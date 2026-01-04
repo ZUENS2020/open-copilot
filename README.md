@@ -33,7 +33,7 @@ _Copilot for Obsidian_ is your in‑vault AI assistant with chat-based vault sea
 - **🔒 Your data is 100% yours**: Local search and storage, and full control of your data if you use self-hosted models.
 - **🧠 Bring Your Own Model**: Use your own custom API endpoints or tap into OpenAI-compatible providers
 - **🖼️ Multimedia understanding**: Drop in webpages, YouTube videos, images, PDFs, EPUBS for quick insights.
-- **🔍 Smart Vault Search**: Search your vault with chat, no setup required. Embeddings are optional.
+- **🔍 Smart Vault Search V3**: High-performance, memory-bounded search that combines lexical precision (Search V3) with semantic understanding (Orama). No persistent index files, fast initial scan, and intelligent chunking.
 - **✍️ Composer and Quick Commands**: Interact with your writing with chat, apply changes with 1 click.
 - **🗂️ Project Mode**: Create AI-ready context based on folders and tags.
 
@@ -91,7 +91,13 @@ Use `@` to add context and chat with your note.
 **Example**:
 > _Summarize [[Q3 Retrospective]] and identify the top 3 action items for Q4 based on the notes in {01-Projects}._
 
-### Vault QA Mode: Chat with Your Entire Vault
+### Vault Search V3: Chat with Your Entire Vault
+
+The new search engine ("Search V3") combines fast lexical scanning with intelligent chunking:
+- **Lexical Precision**: Uses BM25-based scoring with boosts for tags, folders, and links.
+- **Semantic Understanding**: Optional integration with Orama for vector-based meaning search.
+- **Memory Efficient**: No massive index files; builds ephemeral indexes on the fly from relevant chunks.
+- **Granular Context**: Retrieves specific sections (chunks) of notes rather than dumping entire files into the context.
 
 **Example**:
 > _What are the recurring themes in my research regarding the intersection of AI and SaaS?_

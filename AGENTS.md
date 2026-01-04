@@ -45,12 +45,17 @@ Copilot for Obsidian is an AI-powered assistant plugin that integrates various L
    - Memory management for conversation context
    - Tool integration (search, file operations, time queries)
 
-3. **Vector Store & Search** (`src/search/`)
+3. **Search System** (`src/search/`)
 
-   - `VectorStoreManager` manages embeddings and semantic search
-   - `ChunkedStorage` for efficient large document handling
-   - Event-driven index updates via `IndexManager`
-   - Multiple embedding providers support
+   - **Search V3 (Lexical)**: High-performance, memory-bounded lexical search
+     - `SearchCore`: Pipeline orchestrator
+     - `ChunkManager`: Intelligent document chunking
+     - `FullTextEngine`: Ephemeral FlexSearch index builder
+     - **Key Feature**: Note-level frontmatter replication across chunks
+   - **Semantic Search (Orama)**: Vector-based semantic retrieval
+     - `VectorStoreManager`: Legacy vector store (deprecated/migrating)
+     - `HybridRetriever`: Combines lexical and semantic results
+   - **Event-Driven Updates**: `IndexManager` handles vault changes
 
 4. **UI Component System** (`src/components/`)
 
@@ -264,6 +269,14 @@ The TODO.md should be:
 ### Obsidian Plugin Environment
 
 - **Global `app` variable**: In Obsidian plugins, `app` is a globally available variable that provides access to the Obsidian API. It's automatically available in all files without needing to import or declare it.
+
+### Search V3 Architecture Notes
+
+- **Chunk-Based**: The system operates on `note_path#chunk_index` rather than whole files.
+- **Ephemeral Indexing**: No persistent full-text index is maintained. Indexes are built on-the-fly from grep-scanned candidates.
+- **Frontmatter Replication**: Note-level properties are replicated to all chunks of that note, ensuring metadata search (tags, author, etc.) works at the chunk level.
+- **Boosts**: Lexical search includes Folder Boost and Graph Boost to surface relevant context.
+- **Semantic Fusion**: When enabled, results from Search V3 and Orama are fused in `MergedSemanticRetriever`.
 
 ### Architecture Migration Notes
 
