@@ -6,8 +6,8 @@ This directory contains the refactored chain runner system for Obsidian Copilot,
 
 The chain runner system provides two distinct tool calling approaches:
 
-1. **Legacy Tool Calling** (CopilotPlusChainRunner) - Uses Brevilabs API for intent analysis
-2. **Autonomous Agent** (AutonomousAgentChainRunner) - Uses XML-based tool calling
+1. **Model-Based Planning** (CopilotPlusChainRunner) - Uses the LLM to plan tool calls via XML structure
+2. **Autonomous Agent** (AutonomousAgentChainRunner) - Uses an iterative XML-based tool calling loop
 
 ## Architecture
 
@@ -16,7 +16,7 @@ chainRunner/
 ├── BaseChainRunner.ts                 # Abstract base class with shared functionality
 ├── LLMChainRunner.ts                  # Basic LLM interaction (no tools)
 ├── VaultQAChainRunner.ts              # Vault-only Q&A with retrieval
-├── CopilotPlusChainRunner.ts          # Legacy tool calling system
+├── CopilotPlusChainRunner.ts          # Model-based tool planning system
 ├── ProjectChainRunner.ts              # Project-aware extension of Plus
 ├── AutonomousAgentChainRunner.ts   # XML-based autonomous agent tool calling
 ├── index.ts                           # Main exports
@@ -33,16 +33,16 @@ chainRunner/
 
 **How it works:**
 
-- Uses chat model with tool descriptions to plan which tools to call
+- Uses chat model with tool descriptions to plan which tools to call in a single pass
 - Model outputs tool calls in XML format (e.g., `<use_tool><name>...</name><args>...</args></use_tool>`)
 - Executes tools synchronously before sending to LLM for final response
-- Enhances user message with tool outputs as context
+- Integrates with the Layered Context System (L1-L5), prepending tool results to the user message (L5)
 - Supports `@` commands for explicit tool invocation (`@vault`, `@websearch`, `@memory`)
 
 **Flow:**
 
 ```
-User Message → Model Planning → Tool Execution → Enhanced Prompt → LLM Response
+User Message → Model Planning → Tool Execution → Enhanced Prompt (L1-L5) → LLM Response
 ```
 
 **Example:**
@@ -128,9 +128,9 @@ while (iteration < maxIterations) {
 
 ## Key Differences
 
-| Aspect             | Legacy (Plus)           | Autonomous Agent                      |
+| Aspect             | Copilot Plus (Planning) | Autonomous Agent                      |
 | ------------------ | ----------------------- | ------------------------------------- |
-| **Tool Decision**  | Brevilabs API analysis  | AI decides autonomously               |
+| **Tool Decision**  | Single-pass planning    | Iterative autonomous decision         |
 | **Tool Execution** | Pre-LLM, synchronous    | During conversation, iterative        |
 | **Tool Format**    | SimpleTool interface    | XML-based structured format           |
 | **Reasoning**      | Intent analysis → tools | AI reasoning → tools → more reasoning |

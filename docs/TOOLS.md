@@ -30,65 +30,6 @@ The system uses a three-layer approach for providing tool instructions to LLMs:
 - `LayerToMessagesConverter.convert(envelope, { includeSystemMessage: true, mergeUserContent: true })` materializes the base messages; runners then append tool XML before sending to the model.
 - `promptPayloadRecorder` inspects the final payload and highlights tool blocks in its layered view, making it easy to debug the L1-L5 structure.
 
-### Why Two Layers: Schema vs Custom Instructions
-
-**Key Difference**: Schema descriptions document parameters, while custom instructions provide XML invocation examples.
-
-1. **Clear Separation**
-
-   - **Schema**: Parameter documentation (types, formats, rules) - NO XML examples
-   - **Custom Instructions**: XML `<use_tool>` examples showing how to invoke
-
-2. **MCP Compatibility**
-
-   - External tools provide immutable schemas
-   - We add custom instructions without modifying their code
-
-3. **Example**
-
-   ```typescript
-   // Schema (parameter documentation only)
-   salientTerms: z.array(z.string()).describe("Keywords to find in notes");
-
-   // Custom Instructions (XML invocation examples)
-   customPromptInstructions: `
-   Example usage:
-   <use_tool>
-   <name>localSearch</name>
-   <query>piano learning</query>
-   <salientTerms>["piano", "learning"]</salientTerms>
-   </use_tool>`;
-   ```
-
-### Best Practices
-
-1. **Schema Descriptions: Parameter Documentation Only**
-
-   - Document parameter types, formats, and validation rules
-   - NO XML examples - those belong in custom instructions
-   - Focus on the data contract
-
-2. **Custom Instructions: XML Examples & Usage Patterns**
-
-   - Provide XML `<use_tool>` invocation examples
-   - Show common usage patterns and edge cases
-   - Include behavioral guidance (when to use vs other tools)
-
-3. **Model Adapters: Model-Specific Fixes**
-   - Only for persistent model-specific failures
-   - Keep minimal and targeted
-
-### localSearch CiC Prompting Flow
-
-- CiC: Corpus in Context https://arxiv.org/pdf/2406.13121
-- **Instruction First**: `CopilotPlusChainRunner` now assembles the localSearch payload via `buildLocalSearchInnerContent`, ensuring citation guidance (e.g., `<guidance>` rules) tops the XML block before any documents.
-- **Documents Next**: Search hits are serialized once through `formatSearchResultsForLLM`; the helper simply appends them after guidance, keeping the documents section untouched but clearly separated.
-- **Question Last**: `renderCiCMessage` formats the final prompt so any context precedes the user's original query; this matches the CiC recommendation for instruction → context → query ordering.
-  - **CopilotPlus**: Uses `LayerToMessagesConverter` which adds `[User query]:` label when merging L3+L5 content from envelope
-  - **AutonomousAgent**: Uses `ensureCiCOrderingWithQuestion` which adds `[User query]:` label to clearly separate tool results from original query in iterative loop
-  - **Consistency**: Both chains use the same `[User query]:` label format for uniform prompting across the codebase
-- **Reusable Wrapping**: `wrapLocalSearchPayload` centralizes the `<localSearch>` tag creation (including optional `timeRange`), making the layout reusable for future chains without copying string glue.
-
 ## Current Implementation
 
 ### Core Files
@@ -116,24 +57,32 @@ class ToolRegistry {
 }
 ```
 
-### Tool Definition Structure
+## Built-in Tools
 
-```typescript
-interface ToolDefinition {
-  tool: SimpleTool<any, any>; // The actual tool implementation
-  metadata: ToolMetadata; // UI and configuration metadata
-}
+The following tools are currently implemented in `src/tools/builtinTools.ts`:
 
-interface ToolMetadata {
-  id: string; // Unique identifier
-  displayName: string; // Shown in UI
-  description: string; // Help text
-  category: "search" | "time" | "file" | "media" | "mcp" | "custom";
-  isAlwaysEnabled?: boolean; // If true, not configurable (e.g., time tools)
-  requiresVault?: boolean; // Needs vault access
-  customPromptInstructions?: string; // Tool-specific prompts
-}
-```
+### Search Tools
+- **localSearch** (`Vault Search`): Search through your vault notes.
+- **webSearch** (`Web Search`): Search the INTERNET (NOT vault notes) when user explicitly asks for web/online information.
+
+### Time Tools
+- **getCurrentTime** (`Get Current Time`): Get the current time in any timezone.
+- **getTimeInfoByEpoch** (`Get Time Info`): Convert epoch timestamp to human-readable format.
+- **getTimeRangeMs** (`Get Time Range`): Convert time expressions to date ranges.
+- **convertTimeBetweenTimezones** (`Convert Timezones`): Convert time between different timezones.
+
+### File Tools
+- **readNote** (`Read Note`): Read a specific note in sequential chunks.
+- **writeToFile** (`Write to File`): Create or modify files in your vault (overwrite/create).
+- **replaceInFile** (`Replace in File`): Make targeted changes to existing files using SEARCH/REPLACE blocks.
+- **getFileTree** (`File Tree`): Browse vault file structure.
+- **getTagList** (`Tag List`): List vault tags with occurrence statistics.
+
+### Memory Tools
+- **updateMemory** (`Update Memory`): Save information to user memory when explicitly asked.
+
+### Media Tools
+- **youtubeTranscription** (`YouTube Transcription`): Get transcripts from YouTube videos.
 
 ## Adding a New Built-in Tool
 
@@ -194,6 +143,8 @@ autonomousAgentEnabledToolIds: [
   "pomodoro",
   "youtubeTranscription",
   "writeToFile",
+  "replaceInFile",
+  "updateMemory",
   "myNewTool"  // Add your tool ID here
 ],
 ```
@@ -263,99 +214,4 @@ export function unregisterMcpServerTools(serverName: string) {
   // Re-initialize built-in tools
   initializeBuiltinTools(app.vault);
 }
-```
-
-### 3. Schema Conversion Helper
-
-Convert MCP JSON Schema to Zod schema:
-
-```typescript
-function convertMcpSchemaToZod(jsonSchema: any): z.ZodSchema {
-  // Basic implementation - extend as needed
-  if (jsonSchema.type === "object") {
-    const shape: any = {};
-
-    for (const [key, prop] of Object.entries(jsonSchema.properties || {})) {
-      const propSchema = prop as any;
-
-      if (propSchema.type === "string") {
-        shape[key] = z.string();
-        if (propSchema.description) {
-          shape[key] = shape[key].describe(propSchema.description);
-        }
-      } else if (propSchema.type === "number") {
-        shape[key] = z.number();
-      } else if (propSchema.type === "boolean") {
-        shape[key] = z.boolean();
-      } else if (propSchema.type === "array") {
-        shape[key] = z.array(z.any()); // Simplification
-      } else if (propSchema.type === "object") {
-        shape[key] = z.object({});
-      }
-
-      // Handle optional properties
-      if (!jsonSchema.required?.includes(key)) {
-        shape[key] = shape[key].optional();
-      }
-    }
-
-    return z.object(shape);
-  }
-
-  // Fallback for other types
-  return z.any();
-}
-```
-
-### 4. Settings Storage for MCP Tools
-
-MCP tool preferences are stored in the same array as built-in tools:
-
-```typescript
-// When enabling/disabling MCP tools:
-function updateMcpToolSetting(toolId: string, enabled: boolean) {
-  const settings = getSettings();
-  const enabledIds = new Set(settings.autonomousAgentEnabledToolIds || []);
-
-  if (enabled) {
-    enabledIds.add(toolId);
-  } else {
-    enabledIds.delete(toolId);
-  }
-
-  updateSetting("autonomousAgentEnabledToolIds", Array.from(enabledIds));
-}
-```
-
-## How the System Works
-
-### Tool Discovery Flow
-
-1. **Initialization**: `initializeBuiltinTools()` registers all built-in tools
-2. **MCP Connection**: When MCP servers connect, their tools are dynamically registered
-3. **Settings UI**: `ToolSettingsSection` component reads from the registry to generate UI
-4. **Tool Execution**: `AutonomousAgentChainRunner.getAvailableTools()` filters tools based on settings
-
-## Tool Call Rendering Roots
-
-React invariant #409 surfaced when tool-call banners attempted to render into React roots that had already been unmounted. To prevent this regression, the plugin routes all banner rendering through the shared manager in `src/components/chat-components/toolCallRootManager.tsx`.
-
-### Manager Responsibilities
-
-- Tracks `{ root, isUnmounting }` per message/tool call via `window.__copilotToolCallRoots`.
-- `ensureToolCallRoot` finalises pending disposals and creates a new `createRoot` when needed.
-- `renderToolCallBanner` renders `<ToolCallBanner />` into the managed root; components never call `root.render` directly.
-- `removeToolCallRoot` and `cleanupMessageToolCallRoots` schedule unmounts on the next tick and drop entries only after disposal completes.
-- `cleanupStaleToolCallRoots` purges message IDs older than one hour to avoid leaking historical roots.
-
-### Integration Notes
-
-`ChatSingleMessage` keeps `const rootsRef = useRef(getMessageToolCallRoots(messageId))`, which provides a stable registry for each message. The component delegates all lifecycle calls to the manager and snapshots `rootsRef.current` inside effect cleanup to satisfy `react-hooks/exhaustive-deps`.
-
-### Verification
-
-Run the focused test to cover the streaming behaviour and tool-call integration:
-
-```
-npm test -- src/components/chat-components/ChatSingleMessage.test.tsx
 ```
