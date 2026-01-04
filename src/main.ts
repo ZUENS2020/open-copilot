@@ -431,10 +431,9 @@ export default class CopilotPlugin extends Plugin {
       const key = getModelKeyFromModel(model);
       const existingModel = modelMap.get(key);
       if (existingModel) {
-        // If it's a built-in model, preserve the built-in status
+        // Preserve existing model
         modelMap.set(key, {
           ...model,
-          isBuiltIn: existingModel.isBuiltIn || model.isBuiltIn,
         });
       } else {
         modelMap.set(key, model);

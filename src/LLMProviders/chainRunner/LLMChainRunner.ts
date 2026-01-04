@@ -91,7 +91,7 @@ export class LLMChainRunner extends BaseChainRunner {
     let excludeThinking = false;
 
     try {
-      const currentModel = findCustomModel(modelKey, settings.activeModels);
+      const currentModel = findCustomModel(modelKey, settings.chatModels);
       // Exclude thinking blocks if model doesn't have REASONING capability
       excludeThinking = !currentModel.capabilities?.includes(ModelCapability.REASONING);
     } catch (error) {

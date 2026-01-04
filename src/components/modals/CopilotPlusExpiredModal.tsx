@@ -11,7 +11,7 @@ import { getSettings } from "@/settings/model";
 function CopilotPlusExpiredModalContent({ onCancel }: { onCancel: () => void }) {
   const settings = getSettings();
   const isUsingPlusModels =
-    isPlusModel(settings.defaultModelKey) && isPlusModel(settings.embeddingModelKey);
+    isPlusModel(settings.defaultChatModelKey) && isPlusModel(settings.defaultEmbeddingModelKey);
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-4">
@@ -34,7 +34,7 @@ function CopilotPlusExpiredModalContent({ onCancel }: { onCancel: () => void }) 
         <Button
           variant="default"
           onClick={() => {
-            navigateToPlusPage(PLUS_UTM_MEDIUMS.EXPIRED_MODAL);
+            navigateToPlusPage("EXPIRED_MODAL");
           }}
         >
           Renew Now <ExternalLink className="tw-size-4" />

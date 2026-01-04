@@ -1,14 +1,16 @@
 import { CustomModel } from "@/aiParams";
 import { SettingItem } from "@/components/ui/setting-item";
-import { BUILTIN_CHAT_MODELS, BUILTIN_EMBEDDING_MODELS } from "@/constants";
 import EmbeddingManager from "@/LLMProviders/embeddingManager";
 import ProjectManager from "@/LLMProviders/projectManager";
 import { logError } from "@/logger";
-import { CopilotSettings, setSettings, updateSetting, useSettingsValue } from "@/settings/model";
+import {
+  CopilotSettings,
+  setSettings,
+  updateSetting,
+  useSettingsValue,
+} from "@/settings/model";
 import { ModelAddDialog } from "@/settings/v2/components/ModelAddDialog";
-import { ModelEditModal } from "@/settings/v2/components/ModelEditDialog";
 import { ModelTable } from "@/settings/v2/components/ModelTable";
-import { omit } from "@/utils";
 import { Notice } from "obsidian";
 import React, { useState } from "react";
 
@@ -19,153 +21,115 @@ export const ModelSettings: React.FC = () => {
 
   const onCopyModel = (model: CustomModel, isEmbeddingModel: boolean = false) => {
     const newModel: CustomModel = {
-      ...omit(model, [
-        "isBuiltIn",
-        "core",
-        "projectEnabled",
-        "plusExclusive",
-        "believerExclusive",
-        "capabilities",
-        "displayName",
-        "dimensions",
-      ]),
+      ...model,
+      id: crypto.randomUUID(),
       name: `${model.name} (copy)`,
     };
 
     const settingField: keyof CopilotSettings = isEmbeddingModel
-      ? "activeEmbeddingModels"
-      : "activeModels";
+      ? "embeddingModels"
+      : "chatModels";
 
     updateSetting(settingField, [...settings[settingField], newModel]);
   };
 
   const handleModelReorder = (newModels: CustomModel[], isEmbeddingModel: boolean = false) => {
     const settingField: keyof CopilotSettings = isEmbeddingModel
-      ? "activeEmbeddingModels"
-      : "activeModels";
+      ? "embeddingModels"
+      : "chatModels";
     updateSetting(settingField, newModels);
   };
 
-  const onDeleteModel = (modelKey: string) => {
-    const [modelName, provider] = modelKey.split("|");
-    const updatedActiveModels = settings.activeModels.filter(
-      (model) => !(model.name === modelName && model.provider === provider)
-    );
+  const onDeleteModel = (modelId: string) => {
+    const updatedModels = settings.chatModels.filter((model) => model.id !== modelId);
 
-    let newDefaultModelKey = settings.defaultModelKey;
-    if (modelKey === settings.defaultModelKey) {
-      const newDefaultModel = updatedActiveModels.find((model) => model.enabled);
-      newDefaultModelKey = newDefaultModel
-        ? `${newDefaultModel.name}|${newDefaultModel.provider}`
-        : "";
+    let newDefaultModelKey = settings.defaultChatModelKey;
+    if (modelId === settings.defaultChatModelKey) {
+      const newDefaultModel = updatedModels.find((model) => model.enabled);
+      newDefaultModelKey = newDefaultModel?.id || "";
     }
 
     setSettings({
-      activeModels: updatedActiveModels,
-      defaultModelKey: newDefaultModelKey,
+      chatModels: updatedModels,
+      defaultChatModelKey: newDefaultModelKey,
     });
   };
 
-  const handleModelUpdate = (
-    isEmbeddingModel: boolean,
-    originalModel: CustomModel,
-    updatedModel: CustomModel
-  ) => {
+  const onSetAsDefault = (modelId: string, isEmbeddingModel: boolean = false) => {
     const settingField: keyof CopilotSettings = isEmbeddingModel
-      ? "activeEmbeddingModels"
-      : "activeModels";
-
-    const modelIndex = settings[settingField].findIndex(
-      (m) => m.name === originalModel.name && m.provider === originalModel.provider
+      ? "defaultEmbeddingModelKey"
+      : "defaultChatModelKey";
+    updateSetting(settingField, modelId);
+    new Notice(
+      `Default ${isEmbeddingModel ? "embedding" : "chat"} model updated successfully`
     );
-    if (modelIndex !== -1) {
-      const updatedModels = [...settings[settingField]];
-      updatedModels[modelIndex] = updatedModel;
-      updateSetting(settingField, updatedModels);
-    } else {
-      new Notice("Could not find model to update");
-      logError("Could not find model to update:", originalModel);
-    }
   };
 
   // Handler for updates originating from the ModelTable itself (e.g., checkbox toggles)
   const handleTableUpdate = (updatedModel: CustomModel) => {
-    const updatedModels = settings.activeModels.map((m) =>
-      m.name === updatedModel.name && m.provider === updatedModel.provider ? updatedModel : m
+    const updatedModels = settings.chatModels.map((m) =>
+      m.id === updatedModel.id ? updatedModel : m
     );
-    updateSetting("activeModels", updatedModels);
+    updateSetting("chatModels", updatedModels);
   };
 
-  const onDeleteEmbeddingModel = (modelKey: string) => {
-    const [modelName, provider] = modelKey.split("|");
-    const updatedModels = settings.activeEmbeddingModels.filter(
-      (model) => !(model.name === modelName && model.provider === provider)
-    );
-    updateSetting("activeEmbeddingModels", updatedModels);
+  const onDeleteEmbeddingModel = (modelId: string) => {
+    const updatedModels = settings.embeddingModels.filter((model) => model.id !== modelId);
+
+    let newDefaultModelKey = settings.defaultEmbeddingModelKey;
+    if (modelId === settings.defaultEmbeddingModelKey) {
+      const newDefaultModel = updatedModels.find((model) => model.enabled);
+      newDefaultModelKey = newDefaultModel?.id || "";
+    }
+
+    setSettings({
+      embeddingModels: updatedModels,
+      defaultEmbeddingModelKey: newDefaultModelKey,
+    });
   };
 
   const handleEmbeddingModelUpdate = (updatedModel: CustomModel) => {
-    const updatedModels = settings.activeEmbeddingModels.map((m) =>
-      m.name === updatedModel.name && m.provider === updatedModel.provider ? updatedModel : m
+    const updatedModels = settings.embeddingModels.map((m) =>
+      m.id === updatedModel.id ? updatedModel : m
     );
-    updateSetting("activeEmbeddingModels", updatedModels);
-  };
-
-  const handleRefreshChatModels = () => {
-    // Get all custom models (non-built-in models)
-    const customModels = settings.activeModels.filter((model) => !model.isBuiltIn);
-
-    // Create a new array with built-in models and custom models
-    const updatedModels = [...BUILTIN_CHAT_MODELS, ...customModels];
-
-    // Update the settings
-    updateSetting("activeModels", updatedModels);
-    new Notice("Chat models refreshed successfully");
-  };
-
-  const handleRefreshEmbeddingModels = () => {
-    // Get all custom models (non-built-in models)
-    const customModels = settings.activeEmbeddingModels.filter((model) => !model.isBuiltIn);
-
-    // Create a new array with built-in models and custom models
-    const updatedModels = [...BUILTIN_EMBEDDING_MODELS, ...customModels];
-
-    // Update the settings
-    updateSetting("activeEmbeddingModels", updatedModels);
-    new Notice("Embedding models refreshed successfully");
+    updateSetting("embeddingModels", updatedModels);
   };
 
   const handleEditModel = (model: CustomModel, isEmbeddingModel: boolean = false) => {
-    const modal = new ModelEditModal(app, model, isEmbeddingModel, handleModelUpdate);
-    modal.open();
+    // For now, we'll implement inline editing in the ModelTable
+    // This can be extended to use a modal if needed
+    new Notice("Model editing is coming soon. Please delete and re-add the model.");
   };
 
   return (
     <div className="tw-space-y-4">
       <section>
         <ModelTable
-          models={settings.activeModels}
+          models={settings.chatModels}
           onEdit={(model) => handleEditModel(model)}
           onCopy={(model) => onCopyModel(model)}
           onDelete={onDeleteModel}
           onAdd={() => setShowAddDialog(true)}
           onUpdateModel={handleTableUpdate}
           onReorderModels={(newModels) => handleModelReorder(newModels)}
-          onRefresh={handleRefreshChatModels}
+          onSetAsDefault={(modelId) => onSetAsDefault(modelId)}
+          defaultModelId={settings.defaultChatModelKey}
           title="Chat Models"
+          description="Add your chat models here. These models will be available in the chat interface."
         />
 
-        {/* model add dialog */}
+        {/* Chat model add dialog */}
         <ModelAddDialog
           open={showAddDialog}
           onOpenChange={setShowAddDialog}
           onAdd={(model) => {
-            const updatedModels = [...settings.activeModels, model];
-            updateSetting("activeModels", updatedModels);
+            const updatedModels = [...settings.chatModels, model];
+            updateSetting("chatModels", updatedModels);
+            // If this is the first chat model, set it as default
+            if (updatedModels.filter((m) => m.enabled).length === 1 && model.enabled) {
+              updateSetting("defaultChatModelKey", model.id);
+            }
           }}
-          ping={(model) =>
-            ProjectManager.instance.getCurrentChainManager().chatModelManager.ping(model)
-          }
         />
 
         <div className="tw-space-y-4">
@@ -184,15 +148,17 @@ export const ModelSettings: React.FC = () => {
 
       <section>
         <ModelTable
-          models={settings.activeEmbeddingModels}
+          models={settings.embeddingModels}
           onEdit={(model) => handleEditModel(model, true)}
           onDelete={onDeleteEmbeddingModel}
           onCopy={(model) => onCopyModel(model, true)}
           onAdd={() => setShowAddEmbeddingDialog(true)}
           onUpdateModel={handleEmbeddingModelUpdate}
           onReorderModels={(newModels) => handleModelReorder(newModels, true)}
-          onRefresh={handleRefreshEmbeddingModels}
+          onSetAsDefault={(modelId) => onSetAsDefault(modelId, true)}
+          defaultModelId={settings.defaultEmbeddingModelKey}
           title="Embedding Models"
+          description="Add your embedding models here. These models are used for semantic search in your vault."
         />
 
         {/* Embedding model add dialog */}
@@ -200,11 +166,13 @@ export const ModelSettings: React.FC = () => {
           open={showAddEmbeddingDialog}
           onOpenChange={setShowAddEmbeddingDialog}
           onAdd={(model) => {
-            const updatedModels = [...settings.activeEmbeddingModels, model];
-            updateSetting("activeEmbeddingModels", updatedModels);
+            const updatedModels = [...settings.embeddingModels, model];
+            updateSetting("embeddingModels", updatedModels);
+            // If this is the first embedding model, set it as default
+            if (updatedModels.filter((m) => m.enabled).length === 1 && model.enabled) {
+              updateSetting("defaultEmbeddingModelKey", model.id);
+            }
           }}
-          isEmbeddingModel={true}
-          ping={(model) => EmbeddingManager.getInstance().ping(model)}
         />
       </section>
     </div>

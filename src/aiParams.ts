@@ -6,6 +6,7 @@ import { ModelCapability } from "@/constants";
 import { settingsAtom, settingsStore } from "@/settings/model";
 import { SelectedTextContext } from "@/types/message";
 import { atom, useAtom } from "jotai";
+import { v4 as uuidv4 } from "uuid";
 
 const userModelKeyAtom = atom<string | null>(null);
 const modelKeyAtom = atom(
@@ -14,7 +15,7 @@ const modelKeyAtom = atom(
     if (userValue !== null) {
       return userValue;
     }
-    return get(settingsAtom).defaultModelKey;
+    return get(settingsAtom).defaultChatModelKey;
   },
   (get, set, newValue) => {
     set(userModelKeyAtom, newValue);
@@ -113,45 +114,23 @@ export interface SetChainOptions {
   refreshIndex?: boolean;
 }
 
+/**
+ * Simplified CustomModel interface for unified API configuration
+ * All models use the global API configuration (apiBaseUrl + apiKey)
+ */
 export interface CustomModel {
-  name: string;
-  provider: string;
-  baseUrl?: string;
-  apiKey?: string;
-  enabled: boolean;
-  isEmbeddingModel?: boolean;
-  isBuiltIn?: boolean;
-  enableCors?: boolean;
-  core?: boolean;
-  stream?: boolean;
-  temperature?: number;
-  maxTokens?: number;
-  topP?: number;
-  frequencyPenalty?: number;
+  id: string; // Unique identifier (auto-generated)
+  name: string; // Model name (e.g., "gpt-4", "text-embedding-3-small")
+  type: 'chat' | 'embedding'; // Model type
+  enabled: boolean; // Whether the model is enabled
+  capabilities?: ModelCapability[]; // Optional model capabilities (vision, reasoning, etc.)
+}
 
-  projectEnabled?: boolean;
-  plusExclusive?: boolean;
-  believerExclusive?: boolean;
-  capabilities?: ModelCapability[];
-  displayName?: string;
-
-  // Embedding models only (Jina at the moment)
-  dimensions?: number;
-  // OpenAI specific fields
-  openAIOrgId?: string;
-
-  // Azure OpenAI specific fields
-  azureOpenAIApiInstanceName?: string;
-  azureOpenAIApiDeploymentName?: string;
-  azureOpenAIApiVersion?: string;
-  azureOpenAIApiEmbeddingDeploymentName?: string;
-
-  // Amazon Bedrock specific fields
-  bedrockRegion?: string;
-
-  // OpenAI GPT-5 and O-series specific fields
-  reasoningEffort?: "minimal" | "low" | "medium" | "high";
-  verbosity?: "low" | "medium" | "high";
+/**
+ * Generate a unique ID for a custom model
+ */
+export function generateModelId(): string {
+  return uuidv4();
 }
 
 export function setModelKey(modelKey: string) {

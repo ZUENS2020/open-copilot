@@ -6,7 +6,7 @@ import {
   setChainType,
 } from "@/aiParams";
 import ChainFactory, { ChainType, Document } from "@/chainFactory";
-import { BUILTIN_CHAT_MODELS, USER_SENDER } from "@/constants";
+import { USER_SENDER } from "@/constants";
 import {
   AutonomousAgentChainRunner,
   ChainRunner,
@@ -134,31 +134,17 @@ export default class ChainManager {
       }
 
       if (neededReInitChatMode) {
-        let customModel = findCustomModel(newModelKey, getSettings().activeModels);
+        let customModel = findCustomModel(newModelKey, getSettings().chatModels);
         if (!customModel) {
           // Reset default model if no model is found
           console.error("Resetting default model. No model configuration found for: ", newModelKey);
-          customModel = BUILTIN_CHAT_MODELS[0];
-          newModelKey = customModel.name + "|" + customModel.provider;
+          throw new Error("No model configuration found for: " + newModelKey);
         }
 
-        // Add validation for project mode
-        if (chainType === ChainType.PROJECT_CHAIN && !customModel.projectEnabled) {
-          // If the model is not project-enabled, find the first project-enabled model
-          const projectEnabledModel = getSettings().activeModels.find(
-            (m) => m.enabled && m.projectEnabled
-          );
-          if (projectEnabledModel) {
-            customModel = projectEnabledModel;
-            newModelKey = projectEnabledModel.name + "|" + projectEnabledModel.provider;
-            new Notice(
-              `Model ${customModel.name} is not available in project mode. Switching to ${projectEnabledModel.name}.`
-            );
-          } else {
-            throw new Error(
-              "No project-enabled models available. Please enable a model for project mode in settings."
-            );
-          }
+        // Add validation for project mode - all models are now project-enabled
+        if (chainType === ChainType.PROJECT_CHAIN) {
+          // Any model can be used in project mode now
+          new Notice(`Using model ${customModel.name} in project mode.`);
         }
 
         const mergedModel = {

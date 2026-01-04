@@ -36,7 +36,8 @@ async function saveUnsupportedCommands(commands: CustomCommand[]) {
 
 /** Migrates the legacy commands in data.json to the new note format. */
 export async function migrateCommands() {
-  const legacyCommands = getSettings().inlineEditCommands;
+  const settings = getSettings();
+  const legacyCommands = (settings as any).inlineEditCommands;
   if (!legacyCommands || legacyCommands.length === 0) {
     return;
   }
@@ -44,7 +45,7 @@ export async function migrateCommands() {
   const unsupportedCommands: CustomCommand[] = [];
   const existingCommands = getCachedCustomCommands();
 
-  const commands = legacyCommands.map((command, index) => ({
+  const commands = legacyCommands.map((command: any, index: number) => ({
     title: command.name,
     content: command.prompt,
     showInContextMenu: command.showInContextMenu,
@@ -81,6 +82,7 @@ export async function migrateCommands() {
     message += `\n\nWe found ${unsupportedCommands.length} unsupported commands. They are saved in ${getCustomCommandsFolder()}/unsupported. To fix them, please resolve the errors and move the note file out of the unsupported folder.`;
   }
 
+  // @ts-ignore - Legacy field that no longer exists in CopilotSettings
   updateSetting("inlineEditCommands", []);
 
   new ConfirmModal(app, () => {}, message, "🚀 New Copilot Custom Commands", "OK", "").open();

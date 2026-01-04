@@ -87,8 +87,8 @@ function CustomCommandChatModalContent({
   const [modelKey] = useModelKey();
   const settings = useSettingsValue();
   const selectedModel = useMemo(
-    () => findCustomModel(command.modelKey || modelKey, settings.activeModels),
-    [command.modelKey, modelKey, settings.activeModels]
+    () => findCustomModel(command.modelKey || modelKey, settings.chatModels),
+    [command.modelKey, modelKey, settings.chatModels]
   );
 
   const { chatChain, chatMemory } = useChatChain(selectedModel, systemPrompt);

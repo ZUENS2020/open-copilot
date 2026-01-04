@@ -32,7 +32,7 @@ function CustomCommandSettingsModalContent({
   onCancel: () => void;
 }) {
   const settings = useSettingsValue();
-  const activeModels = settings.activeModels
+  const activeModels = settings.chatModels
     .filter((m) => m.enabled)
     .map((model) => ({
       label: getModelDisplayText(model),

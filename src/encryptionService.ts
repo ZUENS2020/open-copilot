@@ -49,20 +49,18 @@ export async function encryptAllKeys(
     (newSettings[key as keyof CopilotSettings] as any) = await getEncryptedKey(apiKey);
   }
 
-  if (Array.isArray(settings.activeModels)) {
-    newSettings.activeModels = await Promise.all(
-      settings.activeModels.map(async (model) => ({
+  if (Array.isArray(settings.chatModels)) {
+    newSettings.chatModels = await Promise.all(
+      settings.chatModels.map(async (model) => ({
         ...model,
-        apiKey: await getEncryptedKey(model.apiKey || ""),
       }))
     );
   }
 
-  if (Array.isArray(settings.activeEmbeddingModels)) {
-    newSettings.activeEmbeddingModels = await Promise.all(
-      settings.activeEmbeddingModels.map(async (model) => ({
+  if (Array.isArray(settings.embeddingModels)) {
+    newSettings.embeddingModels = await Promise.all(
+      settings.embeddingModels.map(async (model) => ({
         ...model,
-        apiKey: await getEncryptedKey(model.apiKey || ""),
       }))
     );
   }

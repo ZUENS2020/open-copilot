@@ -1,20 +1,16 @@
 import { setChainType, setModelKey } from "@/aiParams";
 import { ChainType } from "@/chainFactory";
 import {
-  ChatModelProviders,
-  ChatModels,
   DEFAULT_SETTINGS,
-  EmbeddingModelProviders,
-  EmbeddingModels,
-  PlusUtmMedium,
+  PLUS_UTM_MEDIUMS,
 } from "@/constants";
 import { logInfo } from "@/logger";
 import { getSettings, setSettings, updateSetting, useSettingsValue } from "@/settings/model";
 import { Notice } from "obsidian";
 
 // Default models for free users (imported from DEFAULT_SETTINGS)
-export const DEFAULT_FREE_CHAT_MODEL_KEY = DEFAULT_SETTINGS.defaultModelKey;
-export const DEFAULT_FREE_EMBEDDING_MODEL_KEY = DEFAULT_SETTINGS.embeddingModelKey;
+export const DEFAULT_FREE_CHAT_MODEL_KEY = DEFAULT_SETTINGS.defaultChatModelKey;
+export const DEFAULT_FREE_EMBEDDING_MODEL_KEY = DEFAULT_SETTINGS.defaultEmbeddingModelKey;
 
 // Copilot Plus models are deprecated - point to default free models
 export const DEFAULT_COPILOT_PLUS_CHAT_MODEL = DEFAULT_FREE_CHAT_MODEL_KEY;
@@ -52,11 +48,11 @@ export function applyPlusSettings(): void {
   // No-op - users should configure their custom API models instead
 }
 
-export function createPlusPageUrl(medium: PlusUtmMedium): string {
+export function createPlusPageUrl(medium: keyof typeof PLUS_UTM_MEDIUMS): string {
   return `https://www.obsidiancopilot.com?utm_source=obsidian&utm_medium=${medium}`;
 }
 
-export function navigateToPlusPage(medium: PlusUtmMedium): void {
+export function navigateToPlusPage(medium: keyof typeof PLUS_UTM_MEDIUMS): void {
   window.open(createPlusPageUrl(medium), "_blank");
 }
 

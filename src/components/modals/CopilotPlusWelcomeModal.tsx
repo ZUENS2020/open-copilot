@@ -44,7 +44,7 @@ function CopilotPlusWelcomeModalContent({
               Embedding model:{" "}
               <b className="tw-text-accent">{DEFAULT_COPILOT_PLUS_EMBEDDING_MODEL}</b>
             </div>
-            {settings.embeddingModelKey !== DEFAULT_COPILOT_PLUS_EMBEDDING_MODEL_KEY && (
+            {settings.defaultEmbeddingModelKey !== DEFAULT_COPILOT_PLUS_EMBEDDING_MODEL_KEY && (
               <div className="tw-flex tw-items-center tw-gap-1 tw-text-sm tw-text-warning">
                 <TriangleAlert className="tw-size-4" /> It will rebuild your embeddings for the
                 entire vault

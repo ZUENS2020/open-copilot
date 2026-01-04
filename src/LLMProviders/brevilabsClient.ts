@@ -79,10 +79,10 @@ export class BrevilabsClient {
   }
 
   private checkLicenseKey() {
-    // Plus functionality has been removed - check for custom API key instead
-    if (!getSettings().customApiApiKey) {
+    // Plus functionality has been removed - check for API key instead
+    if (!getSettings().apiKey) {
       throw new Error(
-        "Custom API key not found. Please enter your API key in the settings."
+        "API key not found. Please enter your API key in Basic Settings."
       );
     }
   }
@@ -116,7 +116,7 @@ export class BrevilabsClient {
       headers: {
         "Content-Type": "application/json",
         ...(!excludeAuthHeader && {
-          Authorization: `Bearer ${await getDecryptedKey(getSettings().customApiApiKey)}`,
+          Authorization: `Bearer ${await getDecryptedKey(getSettings().apiKey)}`,
         }),
         "X-Client-Version": this.pluginVersion,
       },
@@ -157,7 +157,7 @@ export class BrevilabsClient {
         method: "POST",
         headers: {
           // No Content-Type header - browser will set it automatically with boundary
-          Authorization: `Bearer ${await getDecryptedKey(getSettings().customApiApiKey)}`,
+          Authorization: `Bearer ${await getDecryptedKey(getSettings().apiKey)}`,
           "X-Client-Version": this.pluginVersion,
         },
         body: formData,
@@ -192,7 +192,7 @@ export class BrevilabsClient {
   ): Promise<{ isValid: boolean | undefined; plan?: string }> {
     // Build the request body with proper structure
     const requestBody: Record<string, any> = {
-      license_key: await getDecryptedKey(getSettings().customApiApiKey),
+      license_key: await getDecryptedKey(getSettings().apiKey),
     };
 
     // Safely spread context if provided, ensuring no conflicts with required fields

@@ -189,13 +189,13 @@ const ChatSingleMessage: React.FC<ChatSingleMessageProps> = ({
   const [modelKey] = useModelKey();
   const shouldProcessThinkBlocks = useMemo(() => {
     try {
-      const currentModel = findCustomModel(modelKey, settings.activeModels);
+      const currentModel = findCustomModel(modelKey, settings.chatModels);
       return currentModel.capabilities?.includes(ModelCapability.REASONING) ?? false;
     } catch {
       // If we can't find the model, default to processing thinking blocks
       return true;
     }
-  }, [modelKey, settings.activeModels]);
+  }, [modelKey, settings.chatModels]);
 
   const copyToClipboard = () => {
     if (!navigator.clipboard || !navigator.clipboard.writeText) {

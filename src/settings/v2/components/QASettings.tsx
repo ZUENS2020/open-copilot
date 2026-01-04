@@ -14,12 +14,12 @@ export const QASettings: React.FC = () => {
   const settings = useSettingsValue();
 
   const handleSetDefaultEmbeddingModel = async (modelKey: string) => {
-    if (modelKey === settings.embeddingModelKey) return;
+    if (modelKey === settings.defaultEmbeddingModelKey) return;
 
     if (settings.enableSemanticSearchV3) {
       // Persist only after user confirms rebuild
       new RebuildIndexConfirmModal(app, async () => {
-        updateSetting("embeddingModelKey", modelKey);
+        updateSetting("defaultEmbeddingModelKey", modelKey);
         const VectorStoreManager = (await import("@/search/vectorStoreManager")).default;
         await VectorStoreManager.getInstance().indexVaultToVectorStore(false);
       }).open();
@@ -27,7 +27,7 @@ export const QASettings: React.FC = () => {
     }
 
     // Persist without rebuild when semantic search is disabled
-    updateSetting("embeddingModelKey", modelKey);
+    updateSetting("defaultEmbeddingModelKey", modelKey);
     new Notice("Embedding model saved. Enable Semantic Search to build the index.");
   };
 
@@ -101,9 +101,9 @@ export const QASettings: React.FC = () => {
                 </div>
               </div>
             }
-            value={settings.embeddingModelKey}
+            value={settings.defaultEmbeddingModelKey}
             onChange={handleSetDefaultEmbeddingModel}
-            options={settings.activeEmbeddingModels.map((model) => ({
+            options={settings.embeddingModels.map((model) => ({
               label: getModelDisplayWithIcons(model),
               value: getModelKeyFromModel(model),
             }))}

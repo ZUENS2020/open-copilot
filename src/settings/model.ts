@@ -1,18 +1,15 @@
-import { CustomModel, ProjectConfig } from "@/aiParams";
+import { CustomModel, ProjectConfig, generateModelId } from "@/aiParams";
 import { atom, createStore, useAtomValue } from "jotai";
 import { v4 as uuidv4 } from "uuid";
 import { UserMemoryManager } from "@/memory/UserMemoryManager";
 
 import { type ChainType } from "@/chainFactory";
 import {
-  BUILTIN_CHAT_MODELS,
-  BUILTIN_EMBEDDING_MODELS,
   COPILOT_FOLDER_ROOT,
   DEFAULT_OPEN_AREA,
   DEFAULT_QA_EXCLUSIONS_SETTING,
   DEFAULT_SETTINGS,
   DEFAULT_SYSTEM_PROMPT,
-  EmbeddingModelProviders,
   SEND_SHORTCUT,
 } from "@/constants";
 import { logInfo } from "@/logger";
@@ -48,109 +45,93 @@ export interface LegacyCommandSettings {
 
 export interface CopilotSettings {
   userId: string;
-  openAIApiKey: string;
-  openAIOrgId: string;
-  huggingfaceApiKey: string;
-  cohereApiKey: string;
-  anthropicApiKey: string;
-  azureOpenAIApiKey: string;
-  azureOpenAIApiInstanceName: string;
-  azureOpenAIApiDeploymentName: string;
-  azureOpenAIApiVersion: string;
-  azureOpenAIApiEmbeddingDeploymentName: string;
-  googleApiKey: string;
-  openRouterAiApiKey: string;
-  xaiApiKey: string;
-  mistralApiKey: string;
-  deepseekApiKey: string;
-  customApiApiKey: string;
-  amazonBedrockApiKey: string;
-  amazonBedrockRegion: string;
-  siliconflowApiKey: string;
+
+  // Unified API configuration
+  apiBaseUrl: string;
+  apiKey: string;
+
+  // Model configuration
+  chatModels: CustomModel[];
+  embeddingModels: CustomModel[];
+  defaultChatModelKey: string;
+  defaultEmbeddingModelKey: string;
+
+  // Chain configuration
   defaultChainType: ChainType;
-  defaultModelKey: string;
-  embeddingModelKey: string;
+
+  // Model parameters
   temperature: number;
   maxTokens: number;
   contextTurns: number;
+  reasoningEffort: "minimal" | "low" | "medium" | "high";
+  verbosity: "low" | "medium" | "high";
+
+  // UI state
   lastDismissedVersion: string | null;
-  // Do not use this directly, use getSystemPrompt() instead
   userSystemPrompt: string;
-  openAIProxyBaseUrl: string;
-  openAIEmbeddingProxyBaseUrl: string;
   stream: boolean;
+
+  // Saving conversations
   defaultSaveFolder: string;
   defaultConversationTag: string;
   autosaveChat: boolean;
-  /**
-   * When enabled, generate a short AI title for chat notes on save.
-   * When disabled (default), use the first 10 words of the first user message.
-   */
   generateAIChatTitleOnSave: boolean;
+  defaultConversationNoteName: string;
+
+  // Context settings
   includeActiveNoteAsContext: boolean;
   customPromptsFolder: string;
   indexVaultToVectorStore: string;
   chatNoteContextPath: string;
   chatNoteContextTags: string[];
   enableIndexSync: boolean;
-  debug: boolean;
-  enableEncryption: boolean;
-  maxSourceChunks: number;
-  enableInlineCitations: boolean;
+
+  // QA settings
   qaExclusions: string;
   qaInclusions: string;
-  groqApiKey: string;
-  activeModels: Array<CustomModel>;
-  activeEmbeddingModels: Array<CustomModel>;
-  promptUsageTimestamps: Record<string, number>;
-  promptSortStrategy: string;
+  maxSourceChunks: number;
+  enableInlineCitations: boolean;
   embeddingRequestsPerMin: number;
   embeddingBatchSize: number;
+  disableIndexOnMobile: boolean;
+
+  // Search settings
+  enableSemanticSearchV3: boolean;
+  enableLexicalBoosts: boolean;
+  lexicalSearchRamLimit: number;
+
+  // UI settings
+  debug: boolean;
+  enableEncryption: boolean;
   defaultOpenArea: DEFAULT_OPEN_AREA;
   defaultSendShortcut: SEND_SHORTCUT;
-  disableIndexOnMobile: boolean;
   showSuggestedPrompts: boolean;
   showRelevantNotes: boolean;
-  numPartitions: number;
-  defaultConversationNoteName: string;
-  inlineEditCommands: LegacyCommandSettings[] | undefined;
-  projectList: Array<ProjectConfig>;
   passMarkdownImages: boolean;
+  autoIncludeTextSelection: boolean;
+
+  // Command settings
+  promptUsageTimestamps: Record<string, number>;
+  promptSortStrategy: string;
+  numPartitions: number;
+  suggestedDefaultCommands: boolean;
+
+  // Project settings
+  projectList: Array<ProjectConfig>;
+  memoryFolderName: string;
+  enableRecentConversations: boolean;
+  maxRecentConversations: number;
+  enableSavedMemory: boolean;
+
+  // Agent settings
   enableAutonomousAgent: boolean;
   enableCustomPromptTemplating: boolean;
-  /** Enable semantic search using Orama for meaning-based document retrieval */
-  enableSemanticSearchV3: boolean;
-  /** Enable lexical boosts (folder and graph) in search - default: true */
-  enableLexicalBoosts: boolean;
-  /**
-   * RAM limit for lexical search index (in MB)
-   * Controls memory usage for full-text search operations
-   * - Range: 20-1000 MB
-   * - Default: 100 MB
-   */
-  lexicalSearchRamLimit: number;
-  /** Whether we have suggested built-in default commands to the user once. */
-  suggestedDefaultCommands: boolean;
   autonomousAgentMaxIterations: number;
   autonomousAgentEnabledToolIds: string[];
-  /** Default reasoning effort for models that support it (GPT-5, O-series, etc.) */
-  reasoningEffort: "minimal" | "low" | "medium" | "high";
-  /** Default verbosity level for models that support it */
-  verbosity: "low" | "medium" | "high";
-  /** Folder where memory data is stored */
-  memoryFolderName: string;
-  /** Reference recent conversation history to provide more contextually relevant responses */
-  enableRecentConversations: boolean;
-  /** Maximum number of recent conversations to remember (10-50) */
-  maxRecentConversations: number;
-  /** Reference saved memories that user explicitly asked to remember */
-  enableSavedMemory: boolean;
-  /** Last selected model for quick command */
+
+  // Quick command settings
   quickCommandModelKey: string | undefined;
-  /** Last checkbox state for including note context in quick command */
   quickCommandIncludeNoteContext: boolean;
-  /** Automatically add text selections to chat context */
-  autoIncludeTextSelection: boolean;
 }
 
 export const settingsStore = createStore();
@@ -160,7 +141,7 @@ export const settingsAtom = atom<CopilotSettings>(DEFAULT_SETTINGS);
  * Sets the settings in the atom.
  */
 export function setSettings(settings: Partial<CopilotSettings>) {
-  const newSettings = mergeAllActiveModelsWithCoreModels({ ...getSettings(), ...settings });
+  const newSettings = { ...getSettings(), ...settings };
   settingsStore.set(settingsAtom, newSettings);
 }
 
@@ -222,8 +203,8 @@ export function getSettings(): Readonly<CopilotSettings> {
 export function resetSettings(): void {
   const defaultSettingsWithBuiltIns = {
     ...DEFAULT_SETTINGS,
-    activeModels: BUILTIN_CHAT_MODELS.map((model) => ({ ...model, enabled: true })),
-    activeEmbeddingModels: BUILTIN_EMBEDDING_MODELS.map((model) => ({ ...model, enabled: true })),
+    chatModels: DEFAULT_SETTINGS.chatModels.map((model: any) => ({ ...model, enabled: true })),
+    embeddingModels: DEFAULT_SETTINGS.embeddingModels.map((model: any) => ({ ...model, enabled: true })),
   };
   setSettings(defaultSettingsWithBuiltIns);
 }
@@ -253,6 +234,67 @@ export function useSettingsValue(): Readonly<CopilotSettings> {
 }
 
 /**
+ * Migration function to convert old settings format to new format
+ */
+function migrateSettings(settings: any): CopilotSettings {
+  const migrated: CopilotSettings = { ...settings };
+
+  // Migrate API configuration
+  if (!migrated.apiBaseUrl) {
+    migrated.apiBaseUrl = settings.openAIProxyBaseUrl || settings.apiBaseUrl || "https://api.openai.com/v1";
+  }
+  if (!migrated.apiKey) {
+    migrated.apiKey = settings.customApiApiKey || settings.apiKey || "";
+  }
+
+  // Migrate activeModels to chatModels
+  if (settings.activeModels && !settings.chatModels) {
+    migrated.chatModels = settings.activeModels
+      .filter((m: any) => !m.isEmbeddingModel)
+      .map((m: any) => ({
+        id: m.id || `${m.name}|${m.provider}`,
+        name: m.name,
+        type: "chat" as const,
+        enabled: m.enabled ?? true,
+        capabilities: m.capabilities || [],
+      }));
+  }
+
+  // Initialize chatModels if it doesn't exist
+  if (!migrated.chatModels) {
+    migrated.chatModels = [];
+  }
+
+  // Migrate activeEmbeddingModels to embeddingModels
+  if (settings.activeEmbeddingModels && !settings.embeddingModels) {
+    migrated.embeddingModels = settings.activeEmbeddingModels
+      .map((m: any) => ({
+        id: m.id || `${m.name}|${m.provider}`,
+        name: m.name,
+        type: "embedding" as const,
+        enabled: m.enabled ?? true,
+      }));
+  }
+
+  // Initialize embeddingModels if it doesn't exist
+  if (!migrated.embeddingModels) {
+    migrated.embeddingModels = [];
+  }
+
+  // Migrate defaultModelKey to defaultChatModelKey
+  if (settings.defaultModelKey && !settings.defaultChatModelKey) {
+    migrated.defaultChatModelKey = settings.defaultModelKey;
+  }
+
+  // Migrate embeddingModelKey to defaultEmbeddingModelKey
+  if (settings.embeddingModelKey && !settings.defaultEmbeddingModelKey) {
+    migrated.defaultEmbeddingModelKey = settings.embeddingModelKey;
+  }
+
+  return migrated;
+}
+
+/**
  * Sanitizes the settings to ensure they are valid.
  * Note: This will be better handled by Zod in the future.
  */
@@ -260,27 +302,14 @@ export function sanitizeSettings(settings: CopilotSettings): CopilotSettings {
   // If settings is null/undefined, use DEFAULT_SETTINGS
   const settingsToSanitize = settings || DEFAULT_SETTINGS;
 
-  if (!settingsToSanitize.userId) {
-    settingsToSanitize.userId = uuidv4();
+  // First, run migration if needed
+  const migratedSettings = migrateSettings(settingsToSanitize);
+
+  if (!migratedSettings.userId) {
+    migratedSettings.userId = uuidv4();
   }
 
-  // fix: Maintain consistency between EmbeddingModelProviders.AZURE_OPENAI and ChatModelProviders.AZURE_OPENAI,
-  // where it was 'azure_openai' before EmbeddingModelProviders.AZURE_OPENAI.
-  if (!settingsToSanitize.activeEmbeddingModels) {
-    settingsToSanitize.activeEmbeddingModels = BUILTIN_EMBEDDING_MODELS.map((model) => ({
-      ...model,
-      enabled: true,
-    }));
-  } else {
-    settingsToSanitize.activeEmbeddingModels = settingsToSanitize.activeEmbeddingModels.map((m) => {
-      return {
-        ...m,
-        provider: m.provider === "azure_openai" ? EmbeddingModelProviders.AZURE_OPENAI : m.provider,
-      };
-    });
-  }
-
-  const sanitizedSettings: CopilotSettings = { ...settingsToSanitize };
+  const sanitizedSettings: CopilotSettings = { ...migratedSettings };
 
   // Stuff in settings are string even when the interface has number type!
   const temperature = Number(settingsToSanitize.temperature);
@@ -457,62 +486,10 @@ export async function getSystemPromptWithMemory(
   return `${memoryPrompt}\n${systemPrompt}`;
 }
 
-function mergeAllActiveModelsWithCoreModels(settings: CopilotSettings): CopilotSettings {
-  settings.activeModels = mergeActiveModels(settings.activeModels, BUILTIN_CHAT_MODELS);
-  settings.activeEmbeddingModels = mergeActiveModels(
-    settings.activeEmbeddingModels,
-    BUILTIN_EMBEDDING_MODELS
-  );
-  return settings;
-}
-
 /**
  * Get a unique model key from a CustomModel instance
- * Format: modelName|provider
+ * In the new structure, this is just the model's ID
  */
 export function getModelKeyFromModel(model: CustomModel): string {
-  return `${model.name}|${model.provider}`;
-}
-
-function mergeActiveModels(
-  existingActiveModels: CustomModel[],
-  builtInModels: CustomModel[]
-): CustomModel[] {
-  const modelMap = new Map<string, CustomModel>();
-
-  // Add core models to the map first
-  builtInModels
-    .filter((model) => model.core)
-    .forEach((model) => {
-      modelMap.set(getModelKeyFromModel(model), { ...model });
-    });
-
-  // Add or update existing models in the map
-  existingActiveModels.forEach((model) => {
-    const key = getModelKeyFromModel(model);
-    const existingModel = modelMap.get(key);
-    if (existingModel) {
-      // If it's a built-in model, preserve all built-in properties
-      const builtInModel = builtInModels.find(
-        (m) => m.name === model.name && m.provider === model.provider
-      );
-      if (builtInModel) {
-        modelMap.set(key, {
-          ...builtInModel,
-          ...model,
-          isBuiltIn: true,
-          believerExclusive: builtInModel.believerExclusive,
-        });
-      } else {
-        modelMap.set(key, {
-          ...model,
-          isBuiltIn: existingModel.isBuiltIn,
-        });
-      }
-    } else {
-      modelMap.set(key, model);
-    }
-  });
-
-  return Array.from(modelMap.values());
+  return model.id;
 }

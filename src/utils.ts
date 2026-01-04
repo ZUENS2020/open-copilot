@@ -1,15 +1,5 @@
 import { ChainType, Document } from "@/chainFactory";
-import {
-  ChatModelProviders,
-  EmbeddingModelProviders,
-  NOMIC_EMBED_TEXT,
-  Provider,
-  ProviderInfo,
-  ProviderMetadata,
-  ProviderSettingsKeyMap,
-  SettingKeyProviders,
-  USER_SENDER,
-} from "@/constants";
+import { USER_SENDER } from "@/constants";
 import { logInfo } from "@/logger";
 import { CopilotSettings } from "@/settings/model";
 import { ChatMessage } from "@/types/message";
@@ -386,16 +376,6 @@ export function areEmbeddingModelsSame(
   model2: string | undefined
 ): boolean {
   if (!model1 || !model2) return false;
-  // TODO: Hacks to handle different embedding model names for the same model. Need better handling.
-  if (model1.includes(NOMIC_EMBED_TEXT) && model2.includes(NOMIC_EMBED_TEXT)) {
-    return true;
-  }
-  if (
-    (model1 === "small" && model2 === "cohereai") ||
-    (model1 === "cohereai" && model2 === "small")
-  ) {
-    return true;
-  }
   return model1 === model2;
 }
 
@@ -826,34 +806,44 @@ export function omit<T extends Record<string, any>, K extends keyof T>(
   return result;
 }
 
-export function findCustomModel(modelKey: string, activeModels: CustomModel[]): CustomModel {
-  const [modelName, provider] = modelKey.split("|");
-  const model = activeModels.find((m) => m.name === modelName && m.provider === provider);
+export function findCustomModel(modelId: string, models: CustomModel[]): CustomModel {
+  const model = models.find((m) => m.id === modelId);
   if (!model) {
-    throw new Error(`No model configuration found for: ${modelKey}`);
+    throw new Error(`No model configuration found for: ${modelId}`);
   }
   return model;
 }
 
-export function getProviderInfo(provider: string): ProviderMetadata {
-  const info = ProviderInfo[provider as Provider];
-  return {
-    ...info,
-    label: info.label || provider,
-  };
-}
-
+/**
+ * Get a human-readable label for a model provider.
+ * Simplified version that returns the provider name or a default label.
+ * @param provider - The provider identifier (unused now since we have unified API)
+ * @param model - Optional model object
+ * @returns A label string for the provider
+ */
 export function getProviderLabel(provider: string, model?: CustomModel): string {
-  const baseLabel = ProviderInfo[provider as Provider]?.label || provider;
-  return baseLabel + (model?.believerExclusive && baseLabel === "Copilot Plus" ? "(Believer)" : "");
+  // With the new unified API structure, all models use the same global API configuration
+  // So we just return "API" as the provider label
+  return "API";
 }
 
-export function getProviderHost(provider: string): string {
-  return ProviderInfo[provider as Provider]?.host || "";
-}
-
-export function getProviderKeyManagementURL(provider: string): string {
-  return ProviderInfo[provider as Provider]?.keyManagementURL || "";
+/**
+ * Check if a model has an API key configured.
+ * Simplified version that checks the global apiKey setting.
+ * @param model - The model to check (unused now since we use global API key)
+ * @param settings - The current settings
+ * @returns Object indicating if API key exists and an optional error notice
+ */
+export function checkModelApiKey(
+  model: CustomModel,
+  settings: Readonly<CopilotSettings>
+): { hasApiKey: boolean; errorNotice?: string } {
+  // With the new unified API structure, all models share the same global API key
+  const hasApiKey = Boolean(settings.apiKey && settings.apiKey.trim().length > 0);
+  return {
+    hasApiKey,
+    errorNotice: hasApiKey ? undefined : "No API key configured in settings",
+  };
 }
 
 /**
@@ -1023,60 +1013,6 @@ export function getMessageRole(
   defaultRole: "system" | "human" = "system"
 ): "system" | "human" {
   return isOSeriesModel(model) ? "human" : defaultRole;
-}
-
-export function getNeedSetKeyProvider() {
-  // List of providers to exclude
-  const excludeProviders: Provider[] = [
-    ChatModelProviders.OPENAI_FORMAT,
-    ChatModelProviders.OLLAMA,
-    ChatModelProviders.LM_STUDIO,
-    ChatModelProviders.AZURE_OPENAI,
-  ];
-
-  return Object.entries(ProviderInfo)
-    .filter(([key]) => !excludeProviders.includes(key as Provider))
-    .map(([key]) => key as Provider);
-}
-
-export function checkModelApiKey(
-  model: CustomModel,
-  settings: Readonly<CopilotSettings>
-): {
-  hasApiKey: boolean;
-  errorNotice?: string;
-} {
-  if (model.provider === ChatModelProviders.AMAZON_BEDROCK) {
-    const apiKey = model.apiKey || settings.amazonBedrockApiKey;
-    if (!apiKey) {
-      return {
-        hasApiKey: false,
-        errorNotice:
-          "Amazon Bedrock API key is missing. Please add a key in Settings > API Keys or update the model configuration.",
-      };
-    }
-
-    // Region defaults to us-east-1 if not specified, so API key is the only required check
-    return { hasApiKey: true };
-  }
-
-  const needSetKeyPath = !!getNeedSetKeyProvider().find((provider) => provider === model.provider);
-  const providerKeyName = ProviderSettingsKeyMap[model.provider as SettingKeyProviders];
-  const hasNoApiKey = !model.apiKey && !settings[providerKeyName];
-
-  if (needSetKeyPath && hasNoApiKey) {
-    const notice =
-      `Please configure API Key for ${model.name} in settings first.` +
-      "\nPath: Settings > copilot plugin > Basic Tab > Set Keys";
-    return {
-      hasApiKey: false,
-      errorNotice: notice,
-    };
-  }
-
-  return {
-    hasApiKey: true,
-  };
 }
 
 /**

@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { DEFAULT_MODEL_SETTING } from "@/constants";
 import { getDecodedPatterns } from "@/search/searchUtils";
 import { getModelKeyFromModel, useSettingsValue } from "@/settings/model";
-import { checkModelApiKey, err2String, randomUUID } from "@/utils";
+import { err2String, randomUUID } from "@/utils";
 import { App, Modal, Notice } from "obsidian";
 import React, { useState } from "react";
 import { createRoot, Root } from "react-dom/client";
@@ -214,21 +214,16 @@ function AddProjectModalContent({ initialProject, onSave, onCancel }: AddProject
             value={formData.projectModelKey}
             onChange={(e) => {
               const value = e.target.value;
-              const selectedModel = settings.activeModels.find(
+              const selectedModel = settings.chatModels.find(
                 (m) => m.enabled && getModelKeyFromModel(m) === value
               );
               if (!selectedModel) return;
-
-              const { hasApiKey, errorNotice } = checkModelApiKey(selectedModel, settings);
-              if (!hasApiKey && errorNotice) {
-                // Keep selection allowed; error will surface in chat on send
-              }
               handleInputChange("projectModelKey", value);
             }}
             onBlur={() => setTouched((prev) => ({ ...prev, projectModelKey: true }))}
             placeholder="Select a model"
-            options={settings.activeModels
-              .filter((m) => m.enabled && m.projectEnabled)
+            options={settings.chatModels
+              .filter((m) => m.enabled)
               .map((model) => ({
                 label: getModelDisplayWithIcons(model),
                 value: getModelKeyFromModel(model),

@@ -1,6 +1,5 @@
 import React from "react";
 import { CustomModel } from "@/aiParams";
-import { getProviderLabel } from "@/utils";
 import { Lightbulb, Eye, Globe } from "lucide-react";
 import { ModelCapability } from "@/constants";
 
@@ -57,7 +56,7 @@ export const ModelCapabilityIcons: React.FC<ModelCapabilityIconsProps> = ({
 };
 
 export const ModelDisplay: React.FC<ModelDisplayProps> = ({ model, iconSize = 14 }) => {
-  const displayName = model.displayName || model.name;
+  const displayName = model.name;
   return (
     <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-1">
       <span className="tw-truncate tw-text-sm hover:tw-text-normal">{displayName}</span>
@@ -71,14 +70,14 @@ export const ModelDisplay: React.FC<ModelDisplayProps> = ({ model, iconSize = 14
 };
 
 export const getModelDisplayText = (model: CustomModel): string => {
-  const displayName = model.displayName || model.name;
-  const provider = `(${getProviderLabel(model.provider)})`;
+  const displayName = model.name;
+  const provider = "(API)";
   return `${displayName} ${provider}`;
 };
 
 export const getModelDisplayWithIcons = (model: CustomModel): string => {
-  const displayName = model.displayName || model.name;
-  const provider = `(${getProviderLabel(model.provider, model)})`;
+  const displayName = model.name;
+  const provider = "(API)";
   const icons =
     model.capabilities
       ?.map((cap) => {

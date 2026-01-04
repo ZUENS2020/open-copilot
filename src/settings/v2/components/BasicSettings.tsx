@@ -1,17 +1,13 @@
 import { ChainType } from "@/chainFactory";
-import { Button } from "@/components/ui/button";
 import { HelpTooltip } from "@/components/ui/help-tooltip";
-import { Input } from "@/components/ui/input";
-import { getModelDisplayWithIcons } from "@/components/ui/model-display";
 import { SettingItem } from "@/components/ui/setting-item";
 import { DEFAULT_OPEN_AREA, SEND_SHORTCUT } from "@/constants";
 import { cn } from "@/lib/utils";
-import { getModelKeyFromModel, updateSetting, useSettingsValue } from "@/settings/model";
-import { checkModelApiKey, formatDateTime } from "@/utils";
-import { Key, Loader2 } from "lucide-react";
+import { updateSetting, useSettingsValue } from "@/settings/model";
+import { formatDateTime } from "@/utils";
+import { Eye, EyeOff, Globe, Key, Loader2 } from "lucide-react";
 import { Notice } from "obsidian";
 import React, { useState } from "react";
-import { ApiKeyDialog } from "./ApiKeyDialog";
 
 const ChainType2Label: Record<ChainType, string> = {
   [ChainType.LLM_CHAIN]: "Chat",
@@ -22,8 +18,9 @@ const ChainType2Label: Record<ChainType, string> = {
 export const BasicSettings: React.FC = () => {
   const settings = useSettingsValue();
   const [isChecking, setIsChecking] = useState(false);
+  const [showApiKey, setShowApiKey] = useState(false);
   const [conversationNoteName, setConversationNoteName] = useState(
-    settings.defaultConversationNoteName || "{$date}_{$time}__{$topic}"
+    settings.defaultConversationNoteName || "{$topic}@{$date}_{$time}"
   );
 
   const applyCustomNoteFormat = () => {
@@ -31,7 +28,7 @@ export const BasicSettings: React.FC = () => {
 
     try {
       // Check required variables
-      const format = conversationNoteName || "{$date}_{$time}__{$topic}";
+      const format = conversationNoteName || "{$topic}@{$date}_{$time}";
       const requiredVars = ["{$date}", "{$time}", "{$topic}"];
       const missingVars = requiredVars.filter((v) => !format.includes(v));
 
@@ -73,102 +70,154 @@ export const BasicSettings: React.FC = () => {
     }
   };
 
-  const defaultModelActivated = !!settings.activeModels.find(
-    (m) => m.enabled && getModelKeyFromModel(m) === settings.defaultModelKey
-  );
-  const enableActivatedModels = settings.activeModels
+  // Get enabled embedding models for selection
+  const enabledEmbeddingModels = settings.embeddingModels
     .filter((m) => m.enabled)
     .map((model) => ({
-      label: getModelDisplayWithIcons(model),
-      value: getModelKeyFromModel(model),
+      label: model.name,
+      value: model.id,
     }));
+
+  const defaultEmbeddingModelActivated = settings.embeddingModels.some(
+    (m) => m.enabled && m.id === settings.defaultEmbeddingModelKey
+  );
 
   return (
     <div className="tw-space-y-4">
-      {/* General Section */}
+      {/* API Configuration Section */}
       <section>
-        <div className="tw-mb-3 tw-text-xl tw-font-bold">General</div>
+        <div className="tw-mb-3 tw-text-xl tw-font-bold">API Configuration</div>
         <div className="tw-space-y-4">
-          <div className="tw-space-y-4">
-            {/* API Key Section */}
-            <SettingItem
-              type="custom"
-              title="API Keys"
-              description={
-                <div className="tw-flex tw-items-center tw-gap-1.5">
-                  <span className="tw-leading-none">
-                    Configure API keys for different AI providers
-                  </span>
-                  <HelpTooltip
-                    content={
-                      <div className="tw-flex tw-max-w-96 tw-flex-col tw-gap-2 tw-py-4">
-                        <div className="tw-text-sm tw-font-medium tw-text-accent">
-                          API key required for chat and QA features
-                        </div>
-                        <div className="tw-text-xs tw-text-muted">
-                          To enable chat and QA functionality, please provide an API key from your
-                          selected provider.
-                        </div>
-                      </div>
-                    }
-                  />
-                </div>
-              }
-            >
-              <Button
-                onClick={() => {
-                  new ApiKeyDialog(app).open();
-                }}
-                variant="secondary"
-                className="tw-flex tw-w-full tw-items-center tw-justify-center tw-gap-2 sm:tw-w-auto sm:tw-justify-start"
-              >
-                Set Keys
-                <Key className="tw-size-4" />
-              </Button>
-            </SettingItem>
-          </div>
           <SettingItem
-            type="select"
-            title="Default Chat Model"
+            type="text"
+            title="API Base URL"
             description={
               <div className="tw-flex tw-items-center tw-gap-1.5">
-                <span className="tw-leading-none">Select the Chat model to use</span>
+                <span className="tw-leading-none">
+                  Your API endpoint (e.g., https://api.openai.com/v1)
+                </span>
                 <HelpTooltip
                   content={
                     <div className="tw-flex tw-max-w-96 tw-flex-col tw-gap-2 tw-py-4">
                       <div className="tw-text-sm tw-font-medium tw-text-accent">
-                        Default model is OpenRouter Gemini 2.5 Flash
+                        Enter your API endpoint
                       </div>
                       <div className="tw-text-xs tw-text-muted">
-                        Set your OpenRouter API key in &apos;API keys&apos; to use this model, or
-                        select a different model from another provider.
+                        Provide the base URL of your API provider. Examples:
+                        <ul className="tw-ml-4 tw-mt-2 tw-list-disc">
+                          <li>OpenAI: https://api.openai.com/v1</li>
+                          <li>Custom endpoint: https://your-api.com/v1</li>
+                        </ul>
                       </div>
                     </div>
                   }
                 />
               </div>
             }
-            value={defaultModelActivated ? settings.defaultModelKey : "Select Model"}
-            onChange={(value) => {
-              const selectedModel = settings.activeModels.find(
-                (m) => m.enabled && getModelKeyFromModel(m) === value
-              );
-              if (!selectedModel) return;
+            value={settings.apiBaseUrl}
+            onChange={(value) => updateSetting("apiBaseUrl", value)}
+            placeholder="https://api.openai.com/v1"
+          />
 
-              const { hasApiKey, errorNotice } = checkModelApiKey(selectedModel, settings);
-              if (!hasApiKey && errorNotice) {
-                // Keep selection allowed; error will surface in chat on send
-              }
-              updateSetting("defaultModelKey", value);
-            }}
+          <SettingItem
+            type="custom"
+            title="API Key"
+            description={
+              <div className="tw-flex tw-items-center tw-gap-1.5">
+                <span className="tw-leading-none">
+                  Your API key for chat and embedding models
+                </span>
+                <HelpTooltip
+                  content={
+                    <div className="tw-flex tw-max-w-96 tw-flex-col tw-gap-2 tw-py-4">
+                      <div className="tw-text-sm tw-font-medium tw-text-accent">
+                        API key required
+                      </div>
+                      <div className="tw-text-xs tw-text-muted">
+                        Provide your API key to enable chat and QA functionality. This key will be
+                        used for all configured models.
+                      </div>
+                    </div>
+                  }
+                />
+              </div>
+            }
+          >
+            <div className="tw-flex tw-w-full tw-items-center tw-gap-2">
+              <div className="tw-relative tw-grow">
+                <input
+                  type={showApiKey ? "text" : "password"}
+                  value={settings.apiKey}
+                  onChange={(e) => updateSetting("apiKey", e.target.value)}
+                  placeholder="sk-..."
+                  className={cn(
+                    "tw-w-full tw-rounded-md tw-border tw-border-border",
+                    "tw-bg-secondary tw-px-3 tw-py-2 tw-text-sm",
+                    "tw-placeholder:text-muted-foreground",
+                    "focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-ring",
+                    "focus:tw-ring-offset-2"
+                  )}
+                />
+              </div>
+              <button
+                onClick={() => setShowApiKey(!showApiKey)}
+                className="tw-flex tw-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-px-3 tw-py-2 tw-transition-colors hover:tw-bg-accent"
+              >
+                {showApiKey ? (
+                  <EyeOff className="tw-size-4" />
+                ) : (
+                  <Eye className="tw-size-4" />
+                )}
+              </button>
+            </div>
+          </SettingItem>
+
+          <SettingItem
+            type="select"
+            title="Default Embedding Model"
+            description={
+              <div className="tw-flex tw-items-center tw-gap-1.5">
+                <span className="tw-leading-none">
+                  Select the default embedding model for RAG
+                </span>
+                <HelpTooltip
+                  content={
+                    <div className="tw-flex tw-max-w-96 tw-flex-col tw-gap-2 tw-py-4">
+                      <div className="tw-text-sm tw-font-medium tw-text-accent">
+                        Embedding model for vault search
+                      </div>
+                      <div className="tw-text-xs tw-text-muted">
+                        This model will be used for semantic search in your vault. Add embedding
+                        models in the Models tab.
+                      </div>
+                    </div>
+                  }
+                />
+              </div>
+            }
+            value={
+              defaultEmbeddingModelActivated
+                ? settings.defaultEmbeddingModelKey
+                : "Select Model"
+            }
+            onChange={(value) => updateSetting("defaultEmbeddingModelKey", value)}
             options={
-              defaultModelActivated
-                ? enableActivatedModels
-                : [{ label: "Select Model", value: "Select Model" }, ...enableActivatedModels]
+              defaultEmbeddingModelActivated
+                ? enabledEmbeddingModels
+                : [
+                    { label: "Select Model", value: "Select Model" },
+                    ...enabledEmbeddingModels,
+                  ]
             }
             placeholder="Model"
           />
+        </div>
+      </section>
 
+      {/* General Section */}
+      <section>
+        <div className="tw-mb-3 tw-text-xl tw-font-bold">General</div>
+        <div className="tw-space-y-4">
           {/* Basic Configuration Group */}
           <SettingItem
             type="select"
@@ -231,8 +280,8 @@ export const BasicSettings: React.FC = () => {
                         Shortcut not working?
                       </div>
                       <div className="tw-text-xs tw-text-muted">
-                        If your selected shortcut doesn&#39;t work, check
-                        <strong> Obsidian&#39;s Settings → Hotkeys</strong> to see if another
+                        If your selected shortcut doesn&apos;t work, check
+                        <strong> Obsidian&apos;s Settings → Hotkeys</strong> to see if another
                         command is using the same key combination. <br />
                         You may need to remove or change the conflicting hotkey first.
                       </div>
@@ -329,10 +378,10 @@ export const BasicSettings: React.FC = () => {
           <SettingItem
             type="text"
             title="Default Conversation Tag"
-            description="The default tag to be used when saving a conversation. Default is 'ai-conversations'"
+            description="The default tag to be used when saving a conversation. Default is 'copilot-conversation'"
             value={settings.defaultConversationTag}
             onChange={(value) => updateSetting("defaultConversationTag", value)}
-            placeholder="ai-conversations"
+            placeholder="copilot-conversation"
           />
 
           <SettingItem
@@ -365,8 +414,8 @@ export const BasicSettings: React.FC = () => {
                           </li>
                         </ul>
                         <i className="tw-mt-2 tw-text-sm tw-text-muted">
-                          Example: {"{$date}_{$time}__{$topic}"} →
-                          20250114_153232__polish_this_article_[[Readme]]
+                          Example: {"{$topic}@{$date}_{$time}"} →
+                          polish_this_article__20250114_153232
                         </i>
                       </div>
                     </div>
@@ -376,22 +425,26 @@ export const BasicSettings: React.FC = () => {
             }
           >
             <div className="tw-flex tw-w-[320px] tw-items-center tw-gap-1.5">
-              <Input
+              <input
                 type="text"
                 className={cn(
-                  "tw-min-w-[80px] tw-grow tw-transition-all tw-duration-200",
+                  "tw-min-w-[80px] tw-grow tw-rounded-md tw-border tw-border-border",
+                  "tw-bg-secondary tw-px-3 tw-py-2 tw-text-sm",
+                  "tw-placeholder:text-muted-foreground",
+                  "focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-ring",
+                  "focus:tw-ring-offset-2 tw-transition-all tw-duration-200",
                   isChecking ? "tw-w-[80px]" : "tw-w-[120px]"
                 )}
-                placeholder="{$date}_{$time}__{$topic}"
+                placeholder="{$topic}@{$date}_{$time}"
                 value={conversationNoteName}
                 onChange={(e) => setConversationNoteName(e.target.value)}
                 disabled={isChecking}
               />
 
-              <Button
+              <button
                 onClick={() => applyCustomNoteFormat()}
                 disabled={isChecking}
-                variant="secondary"
+                className="tw-inline-flex tw-items-center tw-gap-2 tw-rounded-md tw-bg-secondary tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-transition-colors hover:tw-bg-accent disabled:tw-opacity-50"
               >
                 {isChecking ? (
                   <>
@@ -401,7 +454,7 @@ export const BasicSettings: React.FC = () => {
                 ) : (
                   "Apply"
                 )}
-              </Button>
+              </button>
             </div>
           </SettingItem>
         </div>

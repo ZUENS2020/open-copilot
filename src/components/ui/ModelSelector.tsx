@@ -33,7 +33,7 @@ export function ModelSelector({
   const [modelError, setModelError] = useState<string | null>(null);
   const settings = useSettingsValue();
 
-  const currentModel = settings.activeModels.find(
+  const currentModel = settings.chatModels.find(
     (model) => model.enabled && getModelKeyFromModel(model) === value
   );
 
@@ -60,7 +60,7 @@ export function ModelSelector({
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="start" className="tw-max-h-64 tw-overflow-y-auto">
-        {settings.activeModels
+        {settings.chatModels
           .filter((model) => model.enabled)
           .map((model) => {
             const { hasApiKey, errorNotice } = checkModelApiKey(model, settings);
@@ -79,7 +79,7 @@ export function ModelSelector({
                     const msg = `Model switch failed: ` + err2String(error);
                     setModelError(msg);
                     // Restore to the last valid model
-                    const lastValidModel = settings.activeModels.find(
+                    const lastValidModel = settings.chatModels.find(
                       (m) => m.enabled && getModelKeyFromModel(m) === value
                     );
                     if (lastValidModel) {
