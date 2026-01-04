@@ -356,7 +356,7 @@ export interface ProviderResponseMap {
   [ChatModelProviders.XAI]: XAIModelResponse;
   [ChatModelProviders.OPENROUTERAI]: OpenRouterAIModelResponse;
   [ChatModelProviders.SILICONFLOW]: SiliconFlowModelResponse;
-  [ChatModelProviders.COPILOT_PLUS]: null;
+  [ChatModelProviders.CUSTOM_API]: null;
   [ChatModelProviders.AZURE_OPENAI]: null;
   [ChatModelProviders.AMAZON_BEDROCK]: unknown;
 }

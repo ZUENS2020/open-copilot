@@ -79,9 +79,10 @@ export class BrevilabsClient {
   }
 
   private checkLicenseKey() {
-    if (!getSettings().plusLicenseKey) {
-      throw new MissingPlusLicenseError(
-        "Copilot Plus license key not found. Please enter your license key in the settings."
+    // Plus functionality has been removed - check for custom API key instead
+    if (!getSettings().customApiApiKey) {
+      throw new Error(
+        "Custom API key not found. Please enter your API key in the settings."
       );
     }
   }
@@ -115,7 +116,7 @@ export class BrevilabsClient {
       headers: {
         "Content-Type": "application/json",
         ...(!excludeAuthHeader && {
-          Authorization: `Bearer ${await getDecryptedKey(getSettings().plusLicenseKey)}`,
+          Authorization: `Bearer ${await getDecryptedKey(getSettings().customApiApiKey)}`,
         }),
         "X-Client-Version": this.pluginVersion,
       },
@@ -156,7 +157,7 @@ export class BrevilabsClient {
         method: "POST",
         headers: {
           // No Content-Type header - browser will set it automatically with boundary
-          Authorization: `Bearer ${await getDecryptedKey(getSettings().plusLicenseKey)}`,
+          Authorization: `Bearer ${await getDecryptedKey(getSettings().customApiApiKey)}`,
           "X-Client-Version": this.pluginVersion,
         },
         body: formData,
@@ -191,7 +192,7 @@ export class BrevilabsClient {
   ): Promise<{ isValid: boolean | undefined; plan?: string }> {
     // Build the request body with proper structure
     const requestBody: Record<string, any> = {
-      license_key: await getDecryptedKey(getSettings().plusLicenseKey),
+      license_key: await getDecryptedKey(getSettings().customApiApiKey),
     };
 
     // Safely spread context if provided, ensuring no conflicts with required fields

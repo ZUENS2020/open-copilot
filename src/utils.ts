@@ -193,8 +193,8 @@ export const stringToChainType = (chain: string): ChainType => {
       return ChainType.LLM_CHAIN;
     case "vault_qa":
       return ChainType.VAULT_QA_CHAIN;
-    case "copilot_plus":
-      return ChainType.COPILOT_PLUS_CHAIN;
+    case "project":
+      return ChainType.PROJECT_CHAIN;
     default:
       throw new Error(`Unknown chain type: ${chain}`);
   }
@@ -333,13 +333,13 @@ export function isAllowedFileForNoteContext(file: TFile | null): boolean {
 }
 
 /**
- * Checks if a chain type is a Plus mode chain (Copilot Plus or Project Chain).
+ * Checks if a chain type is a Plus mode chain (Project Chain).
  * Plus mode chains have access to premium features like PDF processing and URL processing.
  * @param chainType The chain type to check
  * @returns true if this is a Plus mode chain, false otherwise
  */
 export function isPlusChain(chainType: ChainType): boolean {
-  return chainType === ChainType.COPILOT_PLUS_CHAIN || chainType === ChainType.PROJECT_CHAIN;
+  return chainType === ChainType.PROJECT_CHAIN;
 }
 
 /**
@@ -1032,8 +1032,6 @@ export function getNeedSetKeyProvider() {
     ChatModelProviders.OLLAMA,
     ChatModelProviders.LM_STUDIO,
     ChatModelProviders.AZURE_OPENAI,
-    EmbeddingModelProviders.COPILOT_PLUS,
-    EmbeddingModelProviders.COPILOT_PLUS_JINA,
   ];
 
   return Object.entries(ProviderInfo)

@@ -823,10 +823,8 @@ const ChatInternal: React.FC<ChatProps & { chatInput: ReturnType<typeof useChatI
                     setSelectedChain(previousMode);
                     setPreviousMode(null);
                   } else {
-                    // default back to chat or plus mode
-                    setSelectedChain(
-                      isPlusUser ? ChainType.COPILOT_PLUS_CHAIN : ChainType.LLM_CHAIN
-                    );
+                    // default back to chat mode
+                    setSelectedChain(ChainType.LLM_CHAIN);
                   }
                 }}
                 showChatUI={(v) => setShowChatUI(v)}

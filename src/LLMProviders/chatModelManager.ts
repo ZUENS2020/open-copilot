@@ -54,8 +54,8 @@ const CHAT_PROVIDER_CONSTRUCTORS = {
   [ChatModelProviders.LM_STUDIO]: ChatOpenAI,
   [ChatModelProviders.GROQ]: ChatGroq,
   [ChatModelProviders.OPENAI_FORMAT]: ChatOpenAI,
+  [ChatModelProviders.CUSTOM_API]: ChatOpenAI,
   [ChatModelProviders.SILICONFLOW]: ChatOpenAI,
-  [ChatModelProviders.COPILOT_PLUS]: ChatOpenAI,
   [ChatModelProviders.MISTRAL]: ChatMistralAI,
   [ChatModelProviders.DEEPSEEK]: ChatDeepSeek,
   [ChatModelProviders.AMAZON_BEDROCK]: BedrockChatModel,
@@ -89,7 +89,7 @@ export default class ChatModelManager {
     [ChatModelProviders.OLLAMA]: () => "default-key",
     [ChatModelProviders.LM_STUDIO]: () => "default-key",
     [ChatModelProviders.OPENAI_FORMAT]: () => "default-key",
-    [ChatModelProviders.COPILOT_PLUS]: () => getSettings().plusLicenseKey,
+    [ChatModelProviders.CUSTOM_API]: () => getSettings().customApiApiKey,
     [ChatModelProviders.MISTRAL]: () => getSettings().mistralApiKey,
     [ChatModelProviders.DEEPSEEK]: () => getSettings().deepseekApiKey,
     [ChatModelProviders.AMAZON_BEDROCK]: () => getSettings().amazonBedrockApiKey,
@@ -306,6 +306,21 @@ export default class ChatModelManager {
           customModel
         ),
       },
+      [ChatModelProviders.CUSTOM_API]: {
+        modelName: modelName,
+        apiKey: await getDecryptedKey(customModel.apiKey || settings.customApiApiKey),
+        configuration: {
+          baseURL: customModel.baseUrl,
+          fetch: customModel.enableCors ? safeFetch : undefined,
+          defaultHeaders: { "dangerously-allow-browser": "true" },
+        },
+        ...this.getOpenAISpecialConfig(
+          modelName,
+          customModel.maxTokens ?? settings.maxTokens,
+          customModel.temperature ?? settings.temperature,
+          customModel
+        ),
+      },
       [ChatModelProviders.SILICONFLOW]: {
         modelName: modelName,
         apiKey: await getDecryptedKey(customModel.apiKey || settings.siliconflowApiKey),
@@ -319,14 +334,6 @@ export default class ChatModelManager {
           customModel.temperature ?? settings.temperature,
           customModel
         ),
-      },
-      [ChatModelProviders.COPILOT_PLUS]: {
-        modelName: modelName,
-        apiKey: await getDecryptedKey(settings.plusLicenseKey),
-        configuration: {
-          baseURL: BREVILABS_MODELS_BASE_URL,
-          fetch: customModel.enableCors ? safeFetch : undefined,
-        },
       },
       [ChatModelProviders.MISTRAL]: {
         model: modelName,
@@ -613,11 +620,6 @@ export default class ChatModelManager {
       return false;
     }
 
-    // Check Copilot Plus entitlement requirements
-    if (model.plusExclusive && !settings.isPlusUser) {
-      return false;
-    }
-
     return true;
   }
 
@@ -708,11 +710,6 @@ export default class ChatModelManager {
     }
     if (!selectedModel.hasApiKey) {
       const errorMessage = `API key is not provided for the model: ${modelKey}.`;
-      if (model.provider === ChatModelProviders.COPILOT_PLUS) {
-        throw new MissingPlusLicenseError(
-          "Copilot Plus license key is not configured. Please enter your license key in the Copilot Plus section at the top of Basic Settings."
-        );
-      }
       throw new MissingApiKeyError(errorMessage);
     }
 

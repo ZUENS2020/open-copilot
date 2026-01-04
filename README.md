@@ -5,15 +5,13 @@ The Ultimate AI Assistant for Your Second Brain
 </h2>
 
 <p align="center">
-  <img src="https://img.shields.io/github/v/release/logancyang/obsidian-copilot?style=for-the-badge&sort=semver" alt="GitHub release (latest SemVer)">
+  <img src="https://img.shields.io/github/v/release/ZUENS2020/open-copilot?style=for-the-badge&sort=semver" alt="GitHub release (latest SemVer)">
   <img src="https://img.shields.io/badge/dynamic/json?logo=obsidian&color=%23483699&label=downloads&query=%24%5B%22copilot%22%5D.downloads&url=https%3A%2F%2Fraw.githubusercontent.com%2Fobsidianmd%2Fobsidian-releases%2Fmaster%2Fcommunity-plugin-stats.json&style=for-the-badge" alt="Obsidian Downloads">
 </p>
 
 <p align="center">
-  <a href="https://www.obsidiancopilot.com/en/docs">Documentation</a> |
-  <a href="https://www.youtube.com/@loganhallucinates">Youtube</a> |
-  <a href="https://github.com/logancyang/obsidian-copilot/issues/new?template=bug_report.md">Report Bug</a> |
-  <a href="https://github.com/logancyang/obsidian-copilot/issues/new?template=feature_request.md">Request Feature</a>
+  <a href="https://github.com/ZUENS2020/open-copilot/issues">Report Bug</a> |
+  <a href="https://github.com/ZUENS2020/open-copilot/issues">Request Feature</a>
 </p>
 
 <p align="center">
@@ -70,7 +68,7 @@ After months of hard work, we have revamped the codebase and adopted a new parad
 - FOR FREE USERS: Image support and chat context menu are available to all users starting from v3.0.0!
 - FOR PLUS USERS: **Autonomous agent** is available with vault search, web search, youtube, composer and soon a lot other tools! **Long-term memory** is also a tool the agent can use by itself starting from 3.1.0!
 
-Read the [Changelog](https://github.com/logancyang/obsidian-copilot/releases/tag/3.0.0).
+Read the [Changelog](https://github.com/ZUENS2020/open-copilot/releases).
 
 ## Why People Love It ❤️
 
@@ -269,18 +267,18 @@ In agent mode, ask Copilot
 - Watch [Youtube](https://www.youtube.com/@loganhallucinates) for walkthroughs.
 - If you're experiencing a bug or have a feature idea, please follow the steps below to help us help you faster:
   - 🐛 Bug Report Checklist
-    - ☑️Use the [bug report template](https://github.com/logancyang/obsidian-copilot/issues/new?template=bug_report.md) when reporting an issue
+    - ☑️Use the [bug report template](https://github.com/ZUENS2020/open-copilot/issues/new?template=bug_report.md) when reporting an issue
     - ☑️Enable Debug Mode in Copilot Settings → Advanced for more detailed logs
     - ☑️Open the dev console to collect error messages:
       - Mac: Cmd + Option + I
       - Windows: Ctrl + Shift + I
     - ☑️Turn off all other plugins, keeping only Copilot enabled
     - ☑️Attach relevant console logs to your report
-    - ☑️Submit your bug report [here](https://github.com/logancyang/obsidian-copilot/issues/new?template=bug_report.md)
+    - ☑️Submit your bug report [here](https://github.com/ZUENS2020/open-copilot/issues/new?template=bug_report.md)
   - 💡 Feature Request Checklist
-    - ☑️Use the [feature request template](https://github.com/logancyang/obsidian-copilot/issues/new?template=feature_request.md) for requesting a new feature
+    - ☑️Use the [feature request template](https://github.com/ZUENS2020/open-copilot/issues/new?template=feature_request.md) for requesting a new feature
     - ☑️Clearly describe the feature, why it matters, and how it would help
-    - ☑️Submit your feature request [here](https://github.com/logancyang/obsidian-copilot/issues/new?template=feature_request.md)
+    - ☑️Submit your feature request [here](https://github.com/ZUENS2020/open-copilot/issues/new?template=feature_request.md)
 
 ## **FAQ**
 
@@ -330,7 +328,7 @@ Please refer to your model provider’s documentation for the context window siz
 
 ## **🙏 Thank You**
 
-If you share the vision of building the most powerful AI agent for our second brain, consider [sponsoring this project](https://github.com/sponsors/logancyang) or buying me a coffee. Help spread the word by sharing Copilot for Obsidian on Twitter/X, Reddit, or your favorite platform!
+If you share the vision of building the most powerful AI agent for our second brain, consider [starring this project](https://github.com/ZUENS2020/open-copilot). Help spread the word by sharing Copilot for Obsidian on your favorite platform!
 
 <p align="center">
   <img src="https://camo.githubusercontent.com/7b8f7343bfc6e3c65c7901846637b603fd812f1a5f768d8b0572558bde859eb9/68747470733a2f2f63646e2e6275796d6561636f666665652e636f6d2f627574746f6e732f76322f64656661756c742d79656c6c6f772e706e67" alt="BuyMeACoffee" width="200">
@@ -357,4 +355,4 @@ Copilot Plus is a premium product of Brevilabs LLC and it is not affiliated with
 
 ## **Authors**
 
-Brevilabs Team | Email: logan@brevilabs.com | X/Twitter: [@logancyang](https://twitter.com/logancyang)
+ZUENS2020 | GitHub: [ZUENS2020](https://github.com/ZUENS2020)

@@ -1,6 +1,5 @@
 import { setChainType, setModelKey } from "@/aiParams";
 import { ChainType } from "@/chainFactory";
-import { CopilotPlusExpiredModal } from "@/components/modals/CopilotPlusExpiredModal";
 import {
   ChatModelProviders,
   ChatModels,
@@ -9,94 +8,48 @@ import {
   EmbeddingModels,
   PlusUtmMedium,
 } from "@/constants";
-import { BrevilabsClient } from "@/LLMProviders/brevilabsClient";
-import { logError, logInfo } from "@/logger";
+import { logInfo } from "@/logger";
 import { getSettings, setSettings, updateSetting, useSettingsValue } from "@/settings/model";
 import { Notice } from "obsidian";
-
-export const DEFAULT_COPILOT_PLUS_CHAT_MODEL = ChatModels.COPILOT_PLUS_FLASH;
-export const DEFAULT_COPILOT_PLUS_CHAT_MODEL_KEY =
-  DEFAULT_COPILOT_PLUS_CHAT_MODEL + "|" + ChatModelProviders.COPILOT_PLUS;
-export const DEFAULT_COPILOT_PLUS_EMBEDDING_MODEL = EmbeddingModels.COPILOT_PLUS_SMALL;
-export const DEFAULT_COPILOT_PLUS_EMBEDDING_MODEL_KEY =
-  DEFAULT_COPILOT_PLUS_EMBEDDING_MODEL + "|" + EmbeddingModelProviders.COPILOT_PLUS;
 
 // Default models for free users (imported from DEFAULT_SETTINGS)
 export const DEFAULT_FREE_CHAT_MODEL_KEY = DEFAULT_SETTINGS.defaultModelKey;
 export const DEFAULT_FREE_EMBEDDING_MODEL_KEY = DEFAULT_SETTINGS.embeddingModelKey;
 
-/** Check if the model key is a Copilot Plus model. */
+// Copilot Plus models are deprecated - point to default free models
+export const DEFAULT_COPILOT_PLUS_CHAT_MODEL = DEFAULT_FREE_CHAT_MODEL_KEY;
+export const DEFAULT_COPILOT_PLUS_EMBEDDING_MODEL = DEFAULT_FREE_EMBEDDING_MODEL_KEY;
+export const DEFAULT_COPILOT_PLUS_EMBEDDING_MODEL_KEY = DEFAULT_FREE_EMBEDDING_MODEL_KEY;
+
+/** Check if the model key is a Copilot Plus model. Always returns false since Plus is removed. */
 export function isPlusModel(modelKey: string): boolean {
-  return modelKey.split("|")[1] === EmbeddingModelProviders.COPILOT_PLUS;
+  return false;
 }
 
-/** Hook to get the isPlusUser setting. */
+/** Hook to get the isPlusUser setting. Always returns false since Plus is removed. */
 export function useIsPlusUser(): boolean | undefined {
   const settings = useSettingsValue();
-  return settings.isPlusUser;
+  // Note: isPlusUser field has been removed from settings, return false for compatibility
+  return false;
 }
 
-/** Check if the user is a Plus user. */
+/** Check if the user is a Plus user. Always returns false since Plus is removed. */
 export async function checkIsPlusUser(context?: Record<string, any>): Promise<boolean | undefined> {
-  if (!getSettings().plusLicenseKey) {
-    turnOffPlus();
-    return false;
-  }
-  const brevilabsClient = BrevilabsClient.getInstance();
-  const result = await brevilabsClient.validateLicenseKey(context);
-  return result.isValid;
+  return false;
 }
 
-/** Check if the user is on the believer plan. */
+/** Check if the user is on the believer plan. Always returns false since Plus is removed. */
 export async function isBelieverPlan(): Promise<boolean> {
-  if (!getSettings().plusLicenseKey) {
-    return false;
-  }
-  const brevilabsClient = BrevilabsClient.getInstance();
-  const result = await brevilabsClient.validateLicenseKey();
-  return result.plan?.toLowerCase() === "believer";
+  return false;
 }
 
 /**
- * Apply the Copilot Plus settings.
- * Includes clinical fix to ensure indexing is triggered when embedding model changes,
- * as the automatic detection doesn't work reliably in all scenarios.
+ * Apply the Copilot Plus settings. Now a no-op since Plus is removed.
+ * Users should configure their custom API models instead.
  */
 export function applyPlusSettings(): void {
-  const defaultModelKey = DEFAULT_COPILOT_PLUS_CHAT_MODEL_KEY;
-  const embeddingModelKey = DEFAULT_COPILOT_PLUS_EMBEDDING_MODEL_KEY;
-  const previousEmbeddingModelKey = getSettings().embeddingModelKey;
-
-  logInfo("applyPlusSettings: Changing embedding model", {
-    from: previousEmbeddingModelKey,
-    to: embeddingModelKey,
-    changed: previousEmbeddingModelKey !== embeddingModelKey,
-  });
-
-  setModelKey(defaultModelKey);
-  setChainType(ChainType.COPILOT_PLUS_CHAIN);
-  setSettings({
-    defaultModelKey,
-    embeddingModelKey,
-    defaultChainType: ChainType.COPILOT_PLUS_CHAIN,
-  });
-
-  // Ensure indexing happens only once when embedding model changes
-  if (previousEmbeddingModelKey !== embeddingModelKey) {
-    logInfo("applyPlusSettings: Embedding model changed, triggering indexing");
-    import("@/search/vectorStoreManager")
-      .then(async (module) => {
-        await module.default.getInstance().indexVaultToVectorStore();
-      })
-      .catch((error) => {
-        logError("Failed to trigger indexing after Plus settings applied:", error);
-        new Notice(
-          "Failed to update Copilot index. Please try force reindexing from the command palette."
-        );
-      });
-  } else {
-    logInfo("applyPlusSettings: No embedding model change, skipping indexing");
-  }
+  logInfo("applyPlusSettings: Plus functionality has been removed. Please configure custom API models.");
+  // No-op - users should configure their custom API models instead
 }
 
 export function createPlusPageUrl(medium: PlusUtmMedium): string {
@@ -108,19 +61,13 @@ export function navigateToPlusPage(medium: PlusUtmMedium): void {
 }
 
 export function turnOnPlus(): void {
-  updateSetting("isPlusUser", true);
+  // No-op - Plus functionality has been removed
 }
 
 /**
- * Turn off Plus user status.
- * IMPORTANT: This is called on every plugin start for users without a Plus license key (see checkIsPlusUser).
- * DO NOT reset model settings here - it will cause free users to lose their model selections on every app restart.
- * Only update the isPlusUser flag.
+ * Turn off Plus user status. Now a no-op since Plus is removed.
+ * The expired modal is no longer shown.
  */
 export function turnOffPlus(): void {
-  const previousIsPlusUser = getSettings().isPlusUser;
-  updateSetting("isPlusUser", false);
-  if (previousIsPlusUser) {
-    new CopilotPlusExpiredModal(app).open();
-  }
+  // No-op - Plus functionality has been removed, no expired modal shown
 }
