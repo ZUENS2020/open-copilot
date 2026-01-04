@@ -1,7 +1,7 @@
 <h1 align="center">Open Copilot for Obsidian</h1>
 
 <h2 align="center">
-A Modified Version of Copilot for Obsidian with Custom API Support
+Your AI Copilot: Chat with Your Second Brain, Learn Faster, Work Smarter.
 </h2>
 
 <p align="center">
@@ -18,57 +18,15 @@ A Modified Version of Copilot for Obsidian with Custom API Support
 
 ## License and Attribution
 
-**This project is a modified version of [Copilot for Obsidian](https://github.com/logancyang/obsidian-copilot) by Logan Yang, originally licensed under the GNU Affero General Public License v3 (AGPL-3.0).**
+This project is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0). You can find the full license text in the [LICENSE](LICENSE) file.
 
-This modified version is distributed under the same AGPL-3.0 license. You can find the full license text in the [LICENSE](LICENSE) file.
-
-### Original Project
-- **Original Author**: Logan Yang (Brevilabs Team)
-- **Original Repository**: https://github.com/logancyang/obsidian-copilot
-- **Original License**: GNU Affero General Public License v3.0
-
-### Modifications Made
-This fork includes the following significant modifications:
-- **Removed Copilot Plus functionality** - All premium/subscription features have been removed
-- **Added Custom API provider** - Users can now configure their own API endpoints for both chat and embedding models
-- **Updated documentation** - Reflects the removal of Plus features and addition of custom API support
-- **Updated repository information** - Points to this fork instead of the original repository
-
-### License Notice
-```
-Copilot for Obsidian
-Copyright (C) 2024 Logan Yang
-Copyright (C) 2025 ZUENS2020
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
-```
+This project is based on [Copilot for Obsidian](https://github.com/logancyang/obsidian-copilot) by Logan Yang, which is also licensed under AGPL-3.0.
 
 ---
 
-## About Open Copilot
+## About
 
-_Open Copilot for Obsidian_ is a modified version of the original Copilot plugin. It is your in‑vault AI assistant with chat-based vault search, powerful context processing, and ever-expanding agentic capabilities within Obsidian's highly customizable workspace - all while keeping your data under **your** control.
-
-### Key Differences from Original
-
-| Feature | Original Copilot | Open Copilot (This Fork) |
-|---------|------------------|--------------------------|
-| Custom API Provider | ❌ No | ✅ Yes (Chat + Embedding) |
-| Copilot Plus | ✅ Yes (Premium) | ❌ Removed |
-| Local Models (Ollama/LM Studio) | ✅ Yes | ✅ Yes |
-| Multiple AI Providers | ✅ Yes | ✅ Yes |
-| License | AGPL-3.0 | AGPL-3.0 |
+_Copilot for Obsidian_ is your in‑vault AI assistant with chat-based vault search, powerful context processing, and ever-expanding agentic capabilities within Obsidian's highly customizable workspace - all while keeping your data under **your** control.
 
 ## Key Features
 
@@ -181,22 +139,10 @@ Access all commands in chat window via `/` or via right-click menu on selected t
 - Local: Ollama, LM Studio
 </details>
 
-<details>
-  <summary><strong>What happened to Copilot Plus?</strong></summary>
-
-Copilot Plus was a premium subscription service in the original Copilot plugin. This fork has removed all Plus functionality and replaced it with the ability to use your own Custom API endpoints. You get the same features by configuring your own API keys.
-</details>
-
 ## Need Help?
 
 - Report bugs: [https://github.com/ZUENS2020/open-copilot/issues](https://github.com/ZUENS2020/open-copilot/issues)
 - Feature requests: [https://github.com/ZUENS2020/open-copilot/issues](https://github.com/ZUENS2020/open-copilot/issues)
-
-## Authors
-
-**Original Project**: Logan Yang (Brevilabs Team)
-
-**This Fork**: ZUENS2020 | GitHub: [ZUENS2020](https://github.com/ZUENS2020)
 
 ---
 

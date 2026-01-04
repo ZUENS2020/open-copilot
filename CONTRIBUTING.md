@@ -1,21 +1,10 @@
-# Contributing to Open Copilot for Obsidian
+# Contributing to Copilot for Obsidian
 
-**This is a fork of the original [Copilot for Obsidian](https://github.com/logancyang/obsidian-copilot) by Logan Yang.**
-
-First off, thank you for considering contributing to Open Copilot for Obsidian! It's people like you who make this project such a great tool!
+First off, thank you for considering contributing to Copilot for Obsidian! It's people like you who make this project such a great tool!
 
 ## License Notice
 
 This project is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0). By contributing, you agree that your contributions will be licensed under the same license.
-
-## Original Project
-
-This is a modified version of [Copilot for Obsidian](https://github.com/logancyang/obsidian-copilot) by Logan Yang (Brevilabs Team).
-
-**Key differences from the original:**
-- Copilot Plus (premium) features have been removed
-- Custom API provider has been added for both chat and embedding models
-- All API calls now use user-configured endpoints
 
 ## How Can I Contribute?
 
@@ -54,7 +43,7 @@ Please follow these steps to have your contribution considered by the maintainer
 
 Here is a great [writeup by Daniel Haven](https://medium.com/gitconnected/how-to-set-up-the-ideal-obsidian-plugin-development-workflow-b222fe72280f) on the best practices for setting up your dev environment for Obsidian plugins.
 
-In the case of Open Copilot for Obsidian, you will need to:
+In the case of Copilot for Obsidian, you will need to:
 
 1. Fork the repo.
 2. Create a vault just for development.
@@ -138,6 +127,5 @@ The most basic ones are model changes and mode changes.
 ## Getting Help
 
 - **Issues**: [GitHub Issues](https://github.com/ZUENS2020/open-copilot/issues)
-- **Original Project**: [Copilot for Obsidian](https://github.com/logancyang/obsidian-copilot)
 
-Thank you for contributing to Open Copilot for Obsidian!
+Thank you for contributing to Copilot for Obsidian!
