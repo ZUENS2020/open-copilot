@@ -24,7 +24,9 @@ export function registerContextMenu(menu: Menu) {
 
     submenu.addItem((subItem: any) => {
       subItem.setTitle("Trigger quick command").onClick(() => {
-        (app as any).commands.executeCommandById(`copilot:${COMMAND_IDS.TRIGGER_QUICK_COMMAND}`);
+        (app as any).commands.executeCommandById(
+          `open-copilot:${COMMAND_IDS.TRIGGER_QUICK_COMMAND}`
+        );
       });
     });
 
