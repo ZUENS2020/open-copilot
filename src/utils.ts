@@ -949,7 +949,7 @@ export async function checkLatestVersion(): Promise<{
 }> {
   try {
     const response = await requestUrl({
-      url: "https://api.github.com/repos/logancyang/obsidian-copilot/releases/latest",
+      url: "https://api.github.com/repos/ZUENS2020/open-copilot/releases/latest",
       method: "GET",
     });
     const version = response.json.tag_name.replace("v", "");

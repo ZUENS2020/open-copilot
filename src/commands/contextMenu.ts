@@ -17,7 +17,7 @@ export function registerContextMenu(menu: Menu) {
     submenu.addItem((subItem: any) => {
       subItem.setTitle("Add selection to chat context").onClick(() => {
         (app as any).commands.executeCommandById(
-          `copilot:${COMMAND_IDS.ADD_SELECTION_TO_CHAT_CONTEXT}`
+          `open-copilot:${COMMAND_IDS.ADD_SELECTION_TO_CHAT_CONTEXT}`
         );
       });
     });
@@ -43,7 +43,7 @@ export function registerContextMenu(menu: Menu) {
     sortCommandsByOrder(visibleCustomCommands).forEach((command: CustomCommand) => {
       submenu.addItem((subItem: any) => {
         subItem.setTitle(command.title).onClick(() => {
-          (app as any).commands.executeCommandById(`copilot:${getCommandId(command.title)}`);
+          (app as any).commands.executeCommandById(`open-copilot:${getCommandId(command.title)}`);
         });
       });
     });

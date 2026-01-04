@@ -90,7 +90,7 @@ export async function reloadCurrentProject() {
     // Then, trigger the full load and processing logic via ProjectManager.
     // getProjectContext will call loadProjectContext if markdownNeedsReload is true (which it is now).
     // loadProjectContext will handle markdown, web, youtube, and other file types (including API calls for new ones).
-    const plugin = (app as any).plugins.getPlugin("copilot");
+    const plugin = (app as any).plugins.getPlugin("open-copilot");
     if (plugin && plugin.projectManager) {
       await plugin.projectManager.getProjectContext(currentProject.id);
       new Notice(`Project context for "${currentProject.name}" reloaded successfully.`);
@@ -137,7 +137,7 @@ export async function forceRebuildCurrentProjectContext() {
         // Step 2: Trigger a full reload from scratch.
         // getProjectContext will call loadProjectContext as the cache is now empty.
         // loadProjectContext will handle markdown, web, youtube, and all other file types.
-        const plugin = (app as any).plugins.getPlugin("copilot");
+        const plugin = (app as any).plugins.getPlugin("open-copilot");
         if (plugin && plugin.projectManager) {
           await plugin.projectManager.getProjectContext(currentProject.id);
           new Notice(

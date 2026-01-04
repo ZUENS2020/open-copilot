@@ -19,7 +19,7 @@ export const TokenLimitWarning: React.FC<TokenLimitWarningProps> = ({ message, a
     // @ts-ignore - Obsidian API
     app.setting.open();
     // @ts-ignore - Obsidian API
-    app.setting.openTabById("copilot");
+    app.setting.openTabById("open-copilot");
   };
 
   return (
