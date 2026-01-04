@@ -8,9 +8,7 @@ import {
 import ChainFactory, { ChainType, Document } from "@/chainFactory";
 import { USER_SENDER } from "@/constants";
 import {
-  AutonomousAgentChainRunner,
   ChainRunner,
-  CopilotPlusChainRunner,
   LLMChainRunner,
   ProjectChainRunner,
   VaultQAChainRunner,
@@ -134,7 +132,7 @@ export default class ChainManager {
       }
 
       if (neededReInitChatMode) {
-        let customModel = findCustomModel(newModelKey, getSettings().chatModels);
+        const customModel = findCustomModel(newModelKey, getSettings().chatModels);
         if (!customModel) {
           // Reset default model if no model is found
           console.error("Resetting default model. No model configuration found for: ", newModelKey);
@@ -258,7 +256,6 @@ export default class ChainManager {
 
   private getChainRunner(): ChainRunner {
     const chainType = getChainType();
-    const settings = getSettings();
 
     switch (chainType) {
       case ChainType.LLM_CHAIN:

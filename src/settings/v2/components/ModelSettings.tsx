@@ -1,14 +1,6 @@
 import { CustomModel } from "@/aiParams";
 import { SettingItem } from "@/components/ui/setting-item";
-import EmbeddingManager from "@/LLMProviders/embeddingManager";
-import ProjectManager from "@/LLMProviders/projectManager";
-import { logError } from "@/logger";
-import {
-  CopilotSettings,
-  setSettings,
-  updateSetting,
-  useSettingsValue,
-} from "@/settings/model";
+import { CopilotSettings, setSettings, updateSetting, useSettingsValue } from "@/settings/model";
 import { ModelAddDialog } from "@/settings/v2/components/ModelAddDialog";
 import { ModelTable } from "@/settings/v2/components/ModelTable";
 import { Notice } from "obsidian";
@@ -26,17 +18,13 @@ export const ModelSettings: React.FC = () => {
       name: `${model.name} (copy)`,
     };
 
-    const settingField: keyof CopilotSettings = isEmbeddingModel
-      ? "embeddingModels"
-      : "chatModels";
+    const settingField: keyof CopilotSettings = isEmbeddingModel ? "embeddingModels" : "chatModels";
 
     updateSetting(settingField, [...settings[settingField], newModel]);
   };
 
   const handleModelReorder = (newModels: CustomModel[], isEmbeddingModel: boolean = false) => {
-    const settingField: keyof CopilotSettings = isEmbeddingModel
-      ? "embeddingModels"
-      : "chatModels";
+    const settingField: keyof CopilotSettings = isEmbeddingModel ? "embeddingModels" : "chatModels";
     updateSetting(settingField, newModels);
   };
 
@@ -60,9 +48,7 @@ export const ModelSettings: React.FC = () => {
       ? "defaultEmbeddingModelKey"
       : "defaultChatModelKey";
     updateSetting(settingField, modelId);
-    new Notice(
-      `Default ${isEmbeddingModel ? "embedding" : "chat"} model updated successfully`
-    );
+    new Notice(`Default ${isEmbeddingModel ? "embedding" : "chat"} model updated successfully`);
   };
 
   // Handler for updates originating from the ModelTable itself (e.g., checkbox toggles)

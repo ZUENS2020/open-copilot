@@ -32,7 +32,6 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import {
-  Check,
   Copy,
   Eye,
   Globe,
@@ -40,8 +39,6 @@ import {
   Lightbulb,
   LucideProps,
   MoreVertical,
-  Pencil,
-  PencilLine,
   Plus,
   Star,
   Trash2,
@@ -94,17 +91,11 @@ interface ModelTableHeaderProps {
 /**
  * Renders the model table header with a title and aligned action buttons.
  */
-const ModelTableHeader: React.FC<ModelTableHeaderProps> = ({
-  title,
-  description,
-  onAdd,
-}) => (
+const ModelTableHeader: React.FC<ModelTableHeaderProps> = ({ title, description, onAdd }) => (
   <div className="tw-mb-3 tw-flex tw-flex-col tw-gap-2 md:tw-flex-row md:tw-items-center md:tw-justify-between">
     <div>
       <h3 className="tw-text-xl tw-font-bold">{title}</h3>
-      {description && (
-        <p className="tw-text-sm tw-text-muted">{description}</p>
-      )}
+      {description && <p className="tw-text-sm tw-text-muted">{description}</p>}
     </div>
     <div className="tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-center sm:tw-justify-end">
       <Button onClick={onAdd} variant="default" className="tw-flex tw-items-center tw-gap-2">
@@ -216,7 +207,7 @@ const ModelCard: React.FC<ModelCardProps> = ({
       subtitle={model.type === "chat" ? "Chat Model" : "Embedding Model"}
       badge={
         isDefault ? (
-          <div className="tw-flex tw-items-center tw-gap-1 tw-rounded-md tw-bg-accent tw-px-2 tw-py-0.5 tw-text-xs tw-font-medium tw-text-on-accent">
+          <div className="tw-bg-accent tw-flex tw-items-center tw-gap-1 tw-rounded-md tw-px-2 tw-py-0.5 tw-text-xs tw-font-medium tw-text-on-accent">
             <Star className="tw-size-3 tw-fill-current" />
             Default
           </div>
@@ -291,7 +282,7 @@ const DesktopSortableTableRow: React.FC<{
         <div className="tw-flex tw-items-center tw-gap-2">
           <span>{model.name}</span>
           {isDefault && (
-            <div className="tw-flex tw-items-center tw-gap-1 tw-rounded-md tw-bg-accent tw-px-1.5 tw-py-0.5 tw-text-xs tw-font-medium tw-text-on-accent">
+            <div className="tw-bg-accent tw-flex tw-items-center tw-gap-1 tw-rounded-md tw-px-1.5 tw-py-0.5 tw-text-xs tw-font-medium tw-text-on-accent">
               <Star className="tw-size-3 tw-fill-current" />
               Default
             </div>
@@ -353,10 +344,7 @@ const DesktopSortableTableRow: React.FC<{
                   </DropdownMenuItem>
                 )}
 
-                <DropdownMenuItem
-                  onClick={() => onDelete(model.id)}
-                  className="tw-text-error"
-                >
+                <DropdownMenuItem onClick={() => onDelete(model.id)} className="tw-text-error">
                   <Trash2 className="tw-mr-2 tw-size-4" />
                   Delete
                 </DropdownMenuItem>
@@ -465,11 +453,7 @@ export const ModelTable: React.FC<ModelTableProps> = ({
       <ModelTableHeader title={title} description={description} onAdd={onAdd} />
       {/* Desktop view */}
       <div className="tw-hidden md:tw-block">
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <div className="tw-relative tw-overflow-hidden">
             <Table>
               <TableHeader>

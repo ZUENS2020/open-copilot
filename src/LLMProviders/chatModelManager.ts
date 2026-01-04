@@ -1,16 +1,10 @@
 import { CustomModel, ModelConfig } from "@/aiParams";
-import { ModelCapability } from "@/constants";
 import { getDecryptedKey } from "@/encryptionService";
 import { logError, logInfo } from "@/logger";
-import {
-  CopilotSettings,
-  getSettings,
-  subscribeToSettingsChange,
-} from "@/settings/model";
+import { CopilotSettings, getSettings, subscribeToSettingsChange } from "@/settings/model";
 import { getModelInfo, safeFetch } from "@/utils";
 import { BaseChatModel } from "@langchain/core/language_models/chat_models";
 import { ChatOpenAI } from "@langchain/openai";
-import { Notice } from "obsidian";
 
 type ChatConstructorType = {
   new (config: any): any;
@@ -49,10 +43,7 @@ export default class ChatModelManager {
   /**
    * Determines the appropriate temperature for a model
    */
-  private getTemperatureForModel(
-    modelName: string,
-    settings: CopilotSettings
-  ): number | undefined {
+  private getTemperatureForModel(modelName: string, settings: CopilotSettings): number | undefined {
     const modelInfo = getModelInfo(modelName);
 
     // Thinking-enabled models don't accept temperature

@@ -1,4 +1,4 @@
-import { CustomModel, ProjectConfig, generateModelId } from "@/aiParams";
+import { CustomModel, ProjectConfig } from "@/aiParams";
 import { atom, createStore, useAtomValue } from "jotai";
 import { v4 as uuidv4 } from "uuid";
 import { UserMemoryManager } from "@/memory/UserMemoryManager";
@@ -204,7 +204,10 @@ export function resetSettings(): void {
   const defaultSettingsWithBuiltIns = {
     ...DEFAULT_SETTINGS,
     chatModels: DEFAULT_SETTINGS.chatModels.map((model: any) => ({ ...model, enabled: true })),
-    embeddingModels: DEFAULT_SETTINGS.embeddingModels.map((model: any) => ({ ...model, enabled: true })),
+    embeddingModels: DEFAULT_SETTINGS.embeddingModels.map((model: any) => ({
+      ...model,
+      enabled: true,
+    })),
   };
   setSettings(defaultSettingsWithBuiltIns);
 }
@@ -241,7 +244,8 @@ function migrateSettings(settings: any): CopilotSettings {
 
   // Migrate API configuration
   if (!migrated.apiBaseUrl) {
-    migrated.apiBaseUrl = settings.openAIProxyBaseUrl || settings.apiBaseUrl || "https://api.openai.com/v1";
+    migrated.apiBaseUrl =
+      settings.openAIProxyBaseUrl || settings.apiBaseUrl || "https://api.openai.com/v1";
   }
   if (!migrated.apiKey) {
     migrated.apiKey = settings.customApiApiKey || settings.apiKey || "";
@@ -267,13 +271,12 @@ function migrateSettings(settings: any): CopilotSettings {
 
   // Migrate activeEmbeddingModels to embeddingModels
   if (settings.activeEmbeddingModels && !settings.embeddingModels) {
-    migrated.embeddingModels = settings.activeEmbeddingModels
-      .map((m: any) => ({
-        id: m.id || `${m.name}|${m.provider}`,
-        name: m.name,
-        type: "embedding" as const,
-        enabled: m.enabled ?? true,
-      }));
+    migrated.embeddingModels = settings.activeEmbeddingModels.map((m: any) => ({
+      id: m.id || `${m.name}|${m.provider}`,
+      name: m.name,
+      type: "embedding" as const,
+      enabled: m.enabled ?? true,
+    }));
   }
 
   // Initialize embeddingModels if it doesn't exist

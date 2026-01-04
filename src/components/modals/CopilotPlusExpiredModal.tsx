@@ -4,7 +4,6 @@ import { createRoot } from "react-dom/client";
 import { Root } from "react-dom/client";
 import { Button } from "@/components/ui/button";
 import { isPlusModel, navigateToPlusPage } from "@/plusUtils";
-import { PLUS_UTM_MEDIUMS } from "@/constants";
 import { ExternalLink } from "lucide-react";
 import { getSettings } from "@/settings/model";
 

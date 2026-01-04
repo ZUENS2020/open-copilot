@@ -137,7 +137,6 @@ export default class EmbeddingManager {
   }
 
   async ping(model: CustomModel): Promise<boolean> {
-    const settings = getSettings();
     const config = await this.getEmbeddingConfig(model);
     const testModel = new OpenAIEmbeddings(config);
     await testModel.embedQuery("test");

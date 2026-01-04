@@ -1,6 +1,5 @@
 import { BREVILABS_API_BASE_URL } from "@/constants";
 import { getDecryptedKey } from "@/encryptionService";
-import { MissingPlusLicenseError } from "@/error";
 import { logInfo } from "@/logger";
 import { turnOffPlus, turnOnPlus } from "@/plusUtils";
 import { getSettings } from "@/settings/model";
@@ -81,9 +80,7 @@ export class BrevilabsClient {
   private checkLicenseKey() {
     // Plus functionality has been removed - check for API key instead
     if (!getSettings().apiKey) {
-      throw new Error(
-        "API key not found. Please enter your API key in Basic Settings."
-      );
+      throw new Error("API key not found. Please enter your API key in Basic Settings.");
     }
   }
 

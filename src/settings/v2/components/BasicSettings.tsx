@@ -5,7 +5,7 @@ import { DEFAULT_OPEN_AREA, SEND_SHORTCUT } from "@/constants";
 import { cn } from "@/lib/utils";
 import { updateSetting, useSettingsValue } from "@/settings/model";
 import { formatDateTime } from "@/utils";
-import { Eye, EyeOff, Globe, Key, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { Notice } from "obsidian";
 import React, { useState } from "react";
 
@@ -124,9 +124,7 @@ export const BasicSettings: React.FC = () => {
             title="API Key"
             description={
               <div className="tw-flex tw-items-center tw-gap-1.5">
-                <span className="tw-leading-none">
-                  Your API key for chat and embedding models
-                </span>
+                <span className="tw-leading-none">Your API key for chat and embedding models</span>
                 <HelpTooltip
                   content={
                     <div className="tw-flex tw-max-w-96 tw-flex-col tw-gap-2 tw-py-4">
@@ -150,6 +148,7 @@ export const BasicSettings: React.FC = () => {
                   value={settings.apiKey}
                   onChange={(e) => updateSetting("apiKey", e.target.value)}
                   placeholder="sk-..."
+                  // eslint-disable-next-line tailwindcss/no-custom-classname
                   className={cn(
                     "tw-w-full tw-rounded-md tw-border tw-border-border",
                     "tw-bg-secondary tw-px-3 tw-py-2 tw-text-sm",
@@ -161,13 +160,9 @@ export const BasicSettings: React.FC = () => {
               </div>
               <button
                 onClick={() => setShowApiKey(!showApiKey)}
-                className="tw-flex tw-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-px-3 tw-py-2 tw-transition-colors hover:tw-bg-accent"
+                className="hover:tw-bg-accent tw-flex tw-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-px-3 tw-py-2 tw-transition-colors"
               >
-                {showApiKey ? (
-                  <EyeOff className="tw-size-4" />
-                ) : (
-                  <Eye className="tw-size-4" />
-                )}
+                {showApiKey ? <EyeOff className="tw-size-4" /> : <Eye className="tw-size-4" />}
               </button>
             </div>
           </SettingItem>
@@ -177,9 +172,7 @@ export const BasicSettings: React.FC = () => {
             title="Default Embedding Model"
             description={
               <div className="tw-flex tw-items-center tw-gap-1.5">
-                <span className="tw-leading-none">
-                  Select the default embedding model for RAG
-                </span>
+                <span className="tw-leading-none">Select the default embedding model for RAG</span>
                 <HelpTooltip
                   content={
                     <div className="tw-flex tw-max-w-96 tw-flex-col tw-gap-2 tw-py-4">
@@ -196,18 +189,13 @@ export const BasicSettings: React.FC = () => {
               </div>
             }
             value={
-              defaultEmbeddingModelActivated
-                ? settings.defaultEmbeddingModelKey
-                : "Select Model"
+              defaultEmbeddingModelActivated ? settings.defaultEmbeddingModelKey : "Select Model"
             }
             onChange={(value) => updateSetting("defaultEmbeddingModelKey", value)}
             options={
               defaultEmbeddingModelActivated
                 ? enabledEmbeddingModels
-                : [
-                    { label: "Select Model", value: "Select Model" },
-                    ...enabledEmbeddingModels,
-                  ]
+                : [{ label: "Select Model", value: "Select Model" }, ...enabledEmbeddingModels]
             }
             placeholder="Model"
           />
@@ -427,12 +415,13 @@ export const BasicSettings: React.FC = () => {
             <div className="tw-flex tw-w-[320px] tw-items-center tw-gap-1.5">
               <input
                 type="text"
+                // eslint-disable-next-line tailwindcss/no-custom-classname
                 className={cn(
                   "tw-min-w-[80px] tw-grow tw-rounded-md tw-border tw-border-border",
                   "tw-bg-secondary tw-px-3 tw-py-2 tw-text-sm",
                   "tw-placeholder:text-muted-foreground",
                   "focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-ring",
-                  "focus:tw-ring-offset-2 tw-transition-all tw-duration-200",
+                  "tw-transition-all tw-duration-200 focus:tw-ring-offset-2",
                   isChecking ? "tw-w-[80px]" : "tw-w-[120px]"
                 )}
                 placeholder="{$topic}@{$date}_{$time}"
@@ -444,7 +433,7 @@ export const BasicSettings: React.FC = () => {
               <button
                 onClick={() => applyCustomNoteFormat()}
                 disabled={isChecking}
-                className="tw-inline-flex tw-items-center tw-gap-2 tw-rounded-md tw-bg-secondary tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-transition-colors hover:tw-bg-accent disabled:tw-opacity-50"
+                className="hover:tw-bg-accent tw-inline-flex tw-items-center tw-gap-2 tw-rounded-md tw-bg-secondary tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-transition-colors disabled:tw-opacity-50"
               >
                 {isChecking ? (
                   <>

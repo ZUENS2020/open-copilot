@@ -183,7 +183,7 @@ export class DBOperations {
       // Attempt lazy initialization if DB is missing
       try {
         await this.initializeDB(await EmbeddingsManager.getInstance().getEmbeddingsAPI());
-      } catch (e) {
+      } catch {
         // Ignore initialization error here, will be handled by the check below
       }
     }

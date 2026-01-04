@@ -1,9 +1,7 @@
-import { getModelKey } from "@/aiParams";
 import { Button } from "@/components/ui/button";
-import { getModelKeyFromModel, getSettings } from "@/settings/model";
 import { ChatMessage } from "@/types/message";
 import { AlertTriangle } from "lucide-react";
-import { App, Notice } from "obsidian";
+import { App } from "obsidian";
 import React from "react";
 
 interface TokenLimitWarningProps {

@@ -1,9 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars -- Plus functionality deprecated, keeping for backwards compatibility */
 import { setChainType, setModelKey } from "@/aiParams";
 import { ChainType } from "@/chainFactory";
-import {
-  DEFAULT_SETTINGS,
-  PLUS_UTM_MEDIUMS,
-} from "@/constants";
+import { DEFAULT_SETTINGS, PLUS_UTM_MEDIUMS } from "@/constants";
 import { logInfo } from "@/logger";
 import { getSettings, setSettings, updateSetting, useSettingsValue } from "@/settings/model";
 import { Notice } from "obsidian";
@@ -44,7 +42,9 @@ export async function isBelieverPlan(): Promise<boolean> {
  * Users should configure their custom API models instead.
  */
 export function applyPlusSettings(): void {
-  logInfo("applyPlusSettings: Plus functionality has been removed. Please configure custom API models.");
+  logInfo(
+    "applyPlusSettings: Plus functionality has been removed. Please configure custom API models."
+  );
   // No-op - users should configure their custom API models instead
 }
 

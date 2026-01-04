@@ -21,7 +21,6 @@ import {
 } from "@/components/ui/select";
 import { MODEL_CAPABILITIES, ModelCapability } from "@/constants";
 import { useTab } from "@/contexts/TabContext";
-import { Loader2 } from "lucide-react";
 import { Notice } from "obsidian";
 import React, { useState } from "react";
 
@@ -33,14 +32,9 @@ interface ModelAddDialogProps {
 
 type ModelType = "chat" | "embedding";
 
-export const ModelAddDialog: React.FC<ModelAddDialogProps> = ({
-  open,
-  onOpenChange,
-  onAdd,
-}) => {
+export const ModelAddDialog: React.FC<ModelAddDialogProps> = ({ open, onOpenChange, onAdd }) => {
   const { modalContainer } = useTab();
   const [dialogElement, setDialogElement] = useState<HTMLDivElement | null>(null);
-  const [isVerifying, setIsVerifying] = useState(false);
 
   const [modelName, setModelName] = useState("");
   const [modelType, setModelType] = useState<ModelType>("chat");
@@ -54,7 +48,7 @@ export const ModelAddDialog: React.FC<ModelAddDialogProps> = ({
 
   // Check if buttons should be disabled
   const isButtonDisabled = (): boolean => {
-    return isVerifying || !isFormValid();
+    return !isFormValid();
   };
 
   const handleAdd = () => {
@@ -92,9 +86,7 @@ export const ModelAddDialog: React.FC<ModelAddDialogProps> = ({
 
   const toggleCapability = (capability: ModelCapability) => {
     setCapabilities((prev) =>
-      prev.includes(capability)
-        ? prev.filter((c) => c !== capability)
-        : [...prev, capability]
+      prev.includes(capability) ? prev.filter((c) => c !== capability) : [...prev, capability]
     );
   };
 
@@ -126,10 +118,7 @@ export const ModelAddDialog: React.FC<ModelAddDialogProps> = ({
         <div className="tw-space-y-4">
           {/* Model Type Selection */}
           <FormField label="Model Type">
-            <Select
-              value={modelType}
-              onValueChange={(value) => setModelType(value as ModelType)}
-            >
+            <Select value={modelType} onValueChange={(value) => setModelType(value as ModelType)}>
               <SelectTrigger>
                 <SelectValue placeholder="Select model type" />
               </SelectTrigger>
@@ -204,9 +193,10 @@ export const ModelAddDialog: React.FC<ModelAddDialogProps> = ({
           </div>
 
           {/* Info Message */}
-          <div className="tw-rounded-md tw-bg-muted tw-px-3 tw-py-2 tw-text-xs tw-text-muted">
-            The API configuration (Base URL and API Key) from Basic Settings will be used for
-            all models.
+          {/* eslint-disable-next-line tailwindcss/no-custom-classname */}
+          <div className="tw-bg-muted tw-rounded-md tw-px-3 tw-py-2 tw-text-xs tw-text-muted">
+            The API configuration (Base URL and API Key) from Basic Settings will be used for all
+            models.
           </div>
         </div>
 
@@ -216,14 +206,7 @@ export const ModelAddDialog: React.FC<ModelAddDialogProps> = ({
             Cancel
           </Button>
           <Button variant="default" onClick={handleAdd} disabled={isButtonDisabled()}>
-            {isVerifying ? (
-              <>
-                <Loader2 className="tw-mr-2 tw-size-4 tw-animate-spin" />
-                Adding...
-              </>
-            ) : (
-              "Add Model"
-            )}
+            Add Model
           </Button>
         </div>
       </DialogContent>
