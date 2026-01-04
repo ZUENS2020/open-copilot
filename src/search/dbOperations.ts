@@ -2,7 +2,7 @@
 // backward compatibility where needed; new features should not depend on this module.
 import EmbeddingsManager from "@/LLMProviders/embeddingManager";
 import { CustomError } from "@/error";
-import { logError, logInfo } from "@/logger";
+import { logError, logInfo, logWarn } from "@/logger";
 import { getSettings, subscribeToSettingsChange } from "@/settings/model";
 import { areEmbeddingModelsSame } from "@/utils";
 import { Embeddings } from "@langchain/core/embeddings";
@@ -180,8 +180,22 @@ export class DBOperations {
 
   public async removeDocs(filePath: string) {
     if (!this.oramaDb) {
-      throw new CustomError("Semantic index database not found.");
+      // Attempt lazy initialization if DB is missing
+      try {
+        await this.initializeDB(await EmbeddingsManager.getInstance().getEmbeddingsAPI());
+      } catch (e) {
+        // Ignore initialization error here, will be handled by the check below
+      }
     }
+
+    if (!this.oramaDb) {
+      // If still not initialized (e.g. genuinely failed or disabled), we cannot remove docs.
+      // Logging a warning is better than throwing, as it allows the caller (reindex) to proceed
+      // with potentially creating a new DB or just failing gracefully.
+      logWarn("Database not initialized, skipping removeDocs for: " + filePath);
+      return;
+    }
+
     try {
       const searchResult = await search(this.oramaDb, {
         term: filePath,
@@ -205,7 +219,7 @@ export class DBOperations {
 
   public getDb(): Orama<any> | undefined {
     if (!this.oramaDb) {
-      console.warn("Database not initialized. Some features may be limited.");
+      logWarn("Database not initialized. Some features may be limited.");
     }
     return this.oramaDb;
   }
@@ -467,10 +481,14 @@ export class DBOperations {
       try {
         await this.initializeDB(embeddingInstance);
       } catch (error) {
-        logError("Failed to initialize database:", error);
-        throw new CustomError(
-          "Failed to initialize semantic index database. Please check your embedding model settings."
-        );
+        logError(`Error initializing semantic index database:`, error);
+        // Only show notice if it's not a "Vault adapter not available" error which is handled by retry logic in VectorStoreManager
+        if (
+          !(error instanceof CustomError && error.message.includes("Vault adapter not available"))
+        ) {
+          new Notice("Failed to initialize Copilot database. Some features may be limited.");
+        }
+        return false;
       }
 
       // If still no DB after init, no existing index to compare against

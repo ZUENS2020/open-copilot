@@ -1,5 +1,6 @@
 import { CustomError } from "@/error";
 import EmbeddingsManager from "@/LLMProviders/embeddingManager";
+import { logError, logInfo, logWarn } from "@/logger";
 import { getSettings } from "@/settings/model";
 import { logFileManager } from "@/logFileManager";
 import { getTagsFromNote, stripHash } from "@/utils";
@@ -25,14 +26,14 @@ export async function getVectorLength(embeddingInstance: Embeddings | undefined)
       throw new CustomError("Failed to get valid embedding vector length");
     }
 
-    console.log(
+    logInfo(
       `Detected vector length: ${sampleEmbedding.length} for model: ${EmbeddingsManager.getModelName(embeddingInstance)}`
     );
     return sampleEmbedding.length;
   } catch (error) {
-    console.error("Error getting vector length:", error);
+    logError("Error getting vector length:", error);
     throw new CustomError(
-      "Failed to determine embedding vector length. Please check your embedding model settings."
+      `Failed to determine embedding vector length for model ${EmbeddingsManager.getModelName(embeddingInstance)}: ${error instanceof Error ? error.message : String(error)}. Please check your embedding model settings and API key.`
     );
   }
 }
@@ -348,7 +349,7 @@ export function extractAppIgnoreSettings(app: App): string[] {
   } catch (e) {
     // Only log in non-test environments
     if (process.env.NODE_ENV !== "test") {
-      console.warn("Error getting userIgnoreFilters from Obsidian config", e);
+      logWarn("Error getting userIgnoreFilters from Obsidian config", e);
     }
   }
 
