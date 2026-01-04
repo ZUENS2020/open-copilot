@@ -81,17 +81,17 @@ export function createTool<TSchema extends z.ZodType, TOutput = any>(
         }
 
         // Validate at runtime with better error handling
-        const validated = options.schema.parse(args);
+        const validated = options.schema.parse(args) as any;
 
         // Merge validated args with injected params for handler
-        const handlerArgs = { ...validated, ...injectedParams };
+        const handlerArgs = { ...(validated || {}), ...injectedParams };
 
         return await options.handler(handlerArgs);
       } catch (error) {
         if (error instanceof z.ZodError) {
           // Format Zod errors for better readability
-          const formattedErrors = error.errors
-            .map((e) => `${e.path.join(".")}: ${e.message}`)
+          const formattedErrors = (error as any).issues
+            .map((e: any) => `${e.path.join(".")}: ${e.message}`)
             .join(", ");
           throw new Error(`Tool ${options.name} validation failed: ${formattedErrors}`);
         }
@@ -139,11 +139,11 @@ function getZodDescription(schema: z.ZodType): string {
     schema instanceof z.ZodNullable ||
     schema instanceof z.ZodDefault
   ) {
-    return getZodDescription(schema._def.innerType);
+    return getZodDescription((schema as any)._def.innerType);
   }
 
   // @ts-ignore - accessing private _def property
-  return schema._def.description || "";
+  return (schema as any)._def.description || "";
 }
 
 /**

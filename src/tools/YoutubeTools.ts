@@ -6,17 +6,13 @@ import { createTool } from "./SimpleTool";
 // Maximum input length to prevent potential DoS attacks
 const MAX_USER_MESSAGE_LENGTH = 50000; // Maximum number of characters
 
-interface YouTubeHandlerArgs {
-  _userMessageContent: string;
-}
-
 const youtubeTranscriptionTool = createTool({
   name: "youtubeTranscription",
   description: "Get transcripts of YouTube videos when the user provides YouTube URLs",
   schema: z.object({}), // Empty schema - the tool will receive _userMessageContent internally
   isPlusOnly: true,
   requiresUserMessageContent: true,
-  handler: async (args: YouTubeHandlerArgs) => {
+  handler: async (args: any) => {
     // The _userMessageContent is injected by the tool execution system
     const { _userMessageContent } = args;
 

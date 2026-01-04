@@ -290,7 +290,7 @@ export class DBOperations {
     const schema = this.createDynamicSchema(vectorLength);
 
     const db = await create({
-      schema,
+      schema: schema as any,
       components: {
         tokenizer: {
           stemmer: undefined,
