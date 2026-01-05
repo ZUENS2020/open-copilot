@@ -734,10 +734,10 @@ export class ProjectContextCache {
    * Check if files match the project's patterns and add them to the project context.
    * Uses existing file cache when available to avoid unnecessary processing.
    */
-  async updateProjectFilesFromPatterns(
+  updateProjectFilesFromPatterns(
     project: ProjectConfig,
     contextCacheToUpdate: ContextCache
-  ): Promise<ContextCache> {
+  ): ContextCache {
     try {
       logInfo(`[updateProjectFilesFromPatterns] Starting for project: ${project.name}`);
       if (!contextCacheToUpdate.fileContexts) {

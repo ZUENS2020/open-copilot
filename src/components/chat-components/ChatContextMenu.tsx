@@ -91,7 +91,7 @@ export const ChatContextMenu: React.FC<ChatContextMenuProps> = ({
     onTypeaheadSelect(category, data);
 
     // Return focus to the editor after selection
-    setTimeout(() => {
+    void setTimeout(() => {
       if (lexicalEditorRef?.current) {
         lexicalEditorRef.current.focus();
       }

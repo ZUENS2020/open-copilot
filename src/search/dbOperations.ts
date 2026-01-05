@@ -226,7 +226,7 @@ export class DBOperations {
     return this.oramaDb;
   }
 
-  public async getIsIndexLoaded(): Promise<boolean> {
+  public getIsIndexLoaded(): boolean {
     return this.isIndexLoaded;
   }
 
@@ -294,7 +294,7 @@ export class DBOperations {
     const schema = this.createDynamicSchema(vectorLength);
 
     const db = await create({
-      schema: schema as any,
+      schema: schema as Record<string, string | number>,
       components: {
         tokenizer: {
           stemmer: undefined,
@@ -352,7 +352,7 @@ export class DBOperations {
       });
 
       if (result.hits.length > 0) {
-        const latestDoc = result.hits[0].document as any;
+        const latestDoc = result.hits[0].document as OramaDocument;
         return latestDoc.mtime;
       }
 
@@ -379,7 +379,7 @@ export class DBOperations {
     };
   }
 
-  async upsert(docToSave: unknown): Promise<any | undefined> {
+  async upsert(docToSave: unknown): Promise<OramaDocument | undefined> {
     if (!this.oramaDb) throw new Error("DB not initialized");
     const db = this.oramaDb;
 
@@ -449,7 +449,7 @@ export class DBOperations {
       });
 
       if (result.hits.length > 0) {
-        const latestDoc = result.hits[0].document as any;
+        const latestDoc = result.hits[0].document as OramaDocument;
         return latestDoc.mtime;
       }
 

@@ -141,7 +141,7 @@ export function ChatHistoryPopover({
       // First click - show confirmation
       setConfirmDeleteId(id);
       // Auto-cancel confirmation after 3 seconds
-      setTimeout(() => {
+      void setTimeout(() => {
         setConfirmDeleteId(null);
       }, 3000);
     }

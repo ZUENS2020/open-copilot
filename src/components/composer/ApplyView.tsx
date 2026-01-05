@@ -41,16 +41,16 @@ export class ApplyView extends ItemView {
     return "Preview Changes";
   }
 
-  async setState(state: ApplyViewState) {
+  setState(state: ApplyViewState): void {
     this.state = state;
     this.render();
   }
 
-  async onOpen() {
+  onOpen(): void {
     this.render();
   }
 
-  async onClose() {
+  onClose(): void {
     if (this.root) {
       this.root.unmount();
       this.root = null;
@@ -266,7 +266,7 @@ const ApplyViewRoot: React.FC<ApplyViewRootProps> = ({ app, state, close }) => {
     });
 
     // Focus on the next change block after state update
-    setTimeout(() => focusNextChangeBlock(blockIndex), 0);
+    void setTimeout(() => focusNextChangeBlock(blockIndex), 0);
   };
 
   // Reject a block of changes

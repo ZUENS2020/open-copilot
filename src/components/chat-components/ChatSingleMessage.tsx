@@ -203,10 +203,10 @@ const ChatSingleMessage: React.FC<ChatSingleMessageProps> = ({
     }
 
     const cleanedContent = cleanMessageForCopy(message.message);
-    navigator.clipboard.writeText(cleanedContent).then(() => {
+    void navigator.clipboard.writeText(cleanedContent).then(() => {
       setIsCopied(true);
 
-      setTimeout(() => {
+      void setTimeout(() => {
         setIsCopied(false);
       }, 2000);
     });
@@ -588,7 +588,7 @@ const ChatSingleMessage: React.FC<ChatSingleMessageProps> = ({
       isUnmountingRef.current = true;
 
       // Defer cleanup to avoid React rendering conflicts
-      setTimeout(() => {
+      void setTimeout(() => {
         // Clean up component
         if (currentComponentRef.current) {
           currentComponentRef.current.unload();

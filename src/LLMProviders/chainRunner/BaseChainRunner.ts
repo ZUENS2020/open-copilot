@@ -140,7 +140,7 @@ export abstract class BaseChainRunner implements ChainRunner {
    * @param error - Raw provider error object.
    * @param processErrorChunk - Callback used to stream error text to the UI.
    */
-  protected async handleError(error: unknown, processErrorChunk: (message: string) => void) {
+  protected handleError(error: unknown, processErrorChunk: (message: string) => void): void {
     const msg = err2String(error);
     logError("Error during LLM invocation:", msg);
     const errorData = error?.response?.data?.error || msg;

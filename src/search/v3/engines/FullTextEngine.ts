@@ -57,7 +57,7 @@ export class FullTextEngine {
     this.memoryManager = new MemoryManager();
     this.chunkManager = chunkManager || new ChunkManager(app);
     // Defer index creation to avoid blocking UI on initialization
-    this.index = null as any;
+    this.index = null;
   }
 
   /**
@@ -65,7 +65,11 @@ export class FullTextEngine {
    * Updated for chunk-based indexing
    */
   private createIndex(): unknown {
-    const Document = (FlexSearch as any).Document;
+    // Access FlexSearch.Document dynamically to avoid import issues
+    const Document = (FlexSearch as { Document?: new (options: unknown) => unknown }).Document;
+    if (!Document) {
+      throw new Error("FlexSearch.Document is not available");
+    }
     const tokenizer = this.tokenizeMixed.bind(this);
     return new Document({
       encode: false,

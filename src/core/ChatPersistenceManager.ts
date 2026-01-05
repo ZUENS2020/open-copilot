@@ -164,7 +164,7 @@ export class ChatPersistenceManager {
   /**
    * Get all chat history files from the vault
    */
-  async getChatHistoryFiles(): Promise<TFile[]> {
+  getChatHistoryFiles(): TFile[] {
     const settings = getSettings();
     const folder = this.app.vault.getAbstractFileByPath(settings.defaultSaveFolder);
     if (!(folder instanceof TFolder)) {

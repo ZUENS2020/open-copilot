@@ -32,7 +32,7 @@ class LogFileManager {
   }
 
   /** Ensure the log manager is initialized. Always starts with an empty buffer. */
-  private async ensureInitialized() {
+  private ensureInitialized(): void {
     if (this.initialized) return;
     // Start with empty buffer - log file is only an export artifact
     this.initialized = true;

@@ -37,7 +37,7 @@ export function PastePlugin({ enableURLPills = false, onImagePaste }: PastePlugi
               event.preventDefault();
 
               // Handle image processing asynchronously
-              Promise.all(
+              void Promise.all(
                 imageItems.map((item) => {
                   const file = item.getAsFile();
                   return file;

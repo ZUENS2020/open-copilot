@@ -309,7 +309,7 @@ export class Docs4LLMParser implements FileParser {
     );
   }
 
-  async clearCache(): Promise<void> {
+  clearCache(): void {
     // This method is no longer needed as cache clearing is handled at the project level
     logInfo("Cache clearing is now handled at the project level");
   }

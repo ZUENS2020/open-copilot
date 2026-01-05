@@ -48,7 +48,7 @@ export default class CopilotView extends ItemView {
     return "Copilot";
   }
 
-  async onOpen(): Promise<void> {
+  onOpen(): void {
     this.root = createRoot(this.containerEl.children[1]);
     const handleSaveAsNote = (saveFunction: () => Promise<void>) => {
       this.handleSaveAsNote = saveFunction;
@@ -103,7 +103,7 @@ export default class CopilotView extends ItemView {
     this.renderView(handleSaveAsNote, updateUserMessageHistory);
   }
 
-  async onClose(): Promise<void> {
+  onClose(): void {
     if (this.root) {
       this.root.unmount();
       this.root = null;

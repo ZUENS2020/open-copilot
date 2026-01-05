@@ -64,6 +64,15 @@ export default class CopilotPlugin extends Plugin {
   private selectionDebounceTimer?: number;
   private selectionChangeHandler?: () => void;
 
+  /**
+   * Helper function to get a CopilotView from a WorkspaceLeaf with proper type guard
+   */
+  private getCopilotView(leaf: WorkspaceLeaf | undefined): CopilotView | null {
+    if (!leaf) return null;
+    const view = leaf.view;
+    return view instanceof CopilotView ? view : null;
+  }
+
   async onload(): Promise<void> {
     await this.loadSettings();
     this.settingsUnsubscriber = subscribeToSettingsChange(async (prev, next) => {
@@ -150,9 +159,11 @@ export default class CopilotPlugin extends Plugin {
           if (file) {
             // Note: File tracking and real-time reindexing removed for simplicity
             // Semantic search indexes are rebuilt manually or on startup as needed
-            const activeCopilotView = this.app.workspace
-              .getLeavesOfType(CHAT_VIEWTYPE)
-              .find((leaf: WorkspaceLeaf) => leaf.view instanceof CopilotView)?.view as CopilotView;
+            const activeCopilotView = this.getCopilotView(
+              this.app.workspace
+                .getLeavesOfType(CHAT_VIEWTYPE)
+                .find((leaf: WorkspaceLeaf) => leaf.view instanceof CopilotView)
+            );
 
             if (activeCopilotView) {
               const event = new CustomEvent(EVENT_NAMES.ACTIVE_LEAF_CHANGE);
@@ -167,8 +178,10 @@ export default class CopilotPlugin extends Plugin {
     this.app.workspace.onLayoutReady(() => {
       void this.customCommandRegister
         .initialize()
-        .then(migrateCommands)
-        .then(suggestDefaultCommands)
+        .then(async () => {
+          await migrateCommands();
+          await suggestDefaultCommands();
+        })
         .catch((err) => {
           console.error("Failed to initialize custom commands:", err);
         });
@@ -205,7 +218,7 @@ export default class CopilotPlugin extends Plugin {
 
   async autosaveCurrentChat() {
     if (getSettings().autosaveChat) {
-      const chatView = this.app.workspace.getLeavesOfType(CHAT_VIEWTYPE)[0]?.view as CopilotView;
+      const chatView = this.getCopilotView(this.app.workspace.getLeavesOfType(CHAT_VIEWTYPE)[0]);
       if (chatView) {
         await chatView.saveChat();
       }
@@ -227,10 +240,12 @@ export default class CopilotPlugin extends Plugin {
     }
 
     // Without the timeout, the view is not yet active
-    setTimeout(() => {
-      const activeCopilotView = this.app.workspace
-        .getLeavesOfType(CHAT_VIEWTYPE)
-        .find((leaf: WorkspaceLeaf) => leaf.view instanceof CopilotView)?.view as CopilotView;
+    void setTimeout(() => {
+      const activeCopilotView = this.getCopilotView(
+        this.app.workspace
+          .getLeavesOfType(CHAT_VIEWTYPE)
+          .find((leaf: WorkspaceLeaf) => leaf.view instanceof CopilotView)
+      );
       if (activeCopilotView && (!checkSelectedText || selectedText)) {
         const event = new CustomEvent(eventType, { detail: { selectedText, eventSubtype } });
         activeCopilotView.eventTarget.dispatchEvent(event);
@@ -243,9 +258,11 @@ export default class CopilotPlugin extends Plugin {
   }
 
   emitChatIsVisible() {
-    const activeCopilotView = this.app.workspace
-      .getLeavesOfType(CHAT_VIEWTYPE)
-      .find((leaf: WorkspaceLeaf) => leaf.view instanceof CopilotView)?.view as CopilotView;
+    const activeCopilotView = this.getCopilotView(
+      this.app.workspace
+        .getLeavesOfType(CHAT_VIEWTYPE)
+        .find((leaf: WorkspaceLeaf) => leaf.view instanceof CopilotView)
+    );
 
     if (activeCopilotView) {
       const event = new CustomEvent(EVENT_NAMES.CHAT_IS_VISIBLE);
@@ -377,7 +394,7 @@ export default class CopilotPlugin extends Plugin {
         return activeFile ? this.app.vault.cachedRead(activeFile) : "";
       },
       replaceSelection: activeView?.editor?.replaceSelection.bind(activeView.editor) || (() => {}),
-    } as Partial<Editor> as Editor;
+    } as Editor;
   }
 
   processCustomPrompt(eventType: string, customPrompt: string) {
@@ -415,7 +432,7 @@ export default class CopilotPlugin extends Plugin {
       this.app.workspace.revealLeaf(leaves[0]);
     }
     // Small delay to ensure React component is ready to receive the focus event
-    setTimeout(() => {
+    void setTimeout(() => {
       this.emitChatIsVisible();
     }, 50);
   }
@@ -464,7 +481,7 @@ export default class CopilotPlugin extends Plugin {
     new LoadChatHistoryModal(this.app, chatFiles, this.loadChatHistory.bind(this)).open();
   }
 
-  async getChatHistoryFiles(): Promise<TFile[]> {
+  getChatHistoryFiles(): TFile[] {
     const folder = this.app.vault.getAbstractFileByPath(getSettings().defaultSaveFolder);
     if (!(folder instanceof TFolder)) {
       return [];
@@ -491,8 +508,8 @@ export default class CopilotPlugin extends Plugin {
     }
   }
 
-  async getChatHistoryItems(): Promise<ChatHistoryItem[]> {
-    const files = await this.getChatHistoryFiles();
+  getChatHistoryItems(): ChatHistoryItem[] {
+    const files = this.getChatHistoryFiles();
     return files.map((file) => ({
       id: file.path,
       title: extractChatTitle(file),
@@ -515,8 +532,9 @@ export default class CopilotPlugin extends Plugin {
     await this.chatUIState.loadChatHistory(file);
 
     // Update the view
-    const copilotView = (existingView || this.app.workspace.getLeavesOfType(CHAT_VIEWTYPE)[0])
-      ?.view as CopilotView;
+    const copilotView = this.getCopilotView(
+      existingView || this.app.workspace.getLeavesOfType(CHAT_VIEWTYPE)[0]
+    );
     if (copilotView) {
       copilotView.updateView();
     }
@@ -610,12 +628,14 @@ export default class CopilotPlugin extends Plugin {
     // Abort any ongoing streams before clearing chat
     const existingView = this.app.workspace.getLeavesOfType(CHAT_VIEWTYPE)[0];
     if (existingView) {
-      const copilotView = existingView.view as CopilotView;
-      // Dispatch abort event to stop any ongoing streams
-      const abortEvent = new CustomEvent(EVENT_NAMES.ABORT_STREAM, {
-        detail: { reason: ABORT_REASON.NEW_CHAT },
-      });
-      copilotView.eventTarget.dispatchEvent(abortEvent);
+      const copilotView = this.getCopilotView(existingView);
+      if (copilotView) {
+        // Dispatch abort event to stop any ongoing streams
+        const abortEvent = new CustomEvent(EVENT_NAMES.ABORT_STREAM, {
+          detail: { reason: ABORT_REASON.NEW_CHAT },
+        });
+        copilotView.eventTarget.dispatchEvent(abortEvent);
+      }
     }
 
     // Clear messages through ChatUIState (which also clears chain memory)
@@ -623,8 +643,10 @@ export default class CopilotPlugin extends Plugin {
 
     // Update view if it exists
     if (existingView) {
-      const copilotView = existingView.view as CopilotView;
-      copilotView.updateView();
+      const copilotView = this.getCopilotView(existingView);
+      if (copilotView) {
+        copilotView.updateView();
+      }
     } else {
       // If view doesn't exist, open it
       await this.activateView();

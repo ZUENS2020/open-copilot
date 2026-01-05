@@ -485,7 +485,7 @@ const ChatInternal: React.FC<ChatProps & { chatInput: ReturnType<typeof useChatI
       const currentProject = getCurrentProject();
       if (currentProject?.id === project.id) {
         // Reload the project context for the newly added project
-        reloadCurrentProject()
+        void reloadCurrentProject()
           .then(() => {
             new Notice(`${project.name} added and context loaded`);
           })
@@ -520,7 +520,7 @@ const ChatInternal: React.FC<ChatProps & { chatInput: ReturnType<typeof useChatI
         setCurrentProject(updateP);
 
         // Reload the project context
-        reloadCurrentProject()
+        void reloadCurrentProject()
           .then(() => {
             new Notice(`${originP.name} updated and context reloaded`);
           })

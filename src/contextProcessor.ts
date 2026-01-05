@@ -525,7 +525,7 @@ export class ContextProcessor {
     return additionalContext;
   }
 
-  async hasEmbeddedPDFs(content: string): Promise<boolean> {
+  hasEmbeddedPDFs(content: string): boolean {
     const pdfRegex = /!\[\[(.*?\.pdf)\]\]/g;
     return pdfRegex.test(content);
   }

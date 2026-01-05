@@ -9,7 +9,7 @@ import { App, TFile } from "obsidian";
 import { ChunkManager } from "./chunks";
 import { RETURN_ALL_LIMIT, SearchCore } from "./SearchCore";
 // Defer requiring ChatModelManager until runtime to avoid test-time import issues
-let getChatModelManagerSingleton: (() => any) | null = null;
+let getChatModelManagerSingleton: (() => { getChatModel(): unknown }) | null = null;
 async function safeGetChatModel() {
   try {
     if (!getChatModelManagerSingleton) {
@@ -450,7 +450,7 @@ export class TieredLexicalRetriever extends BaseRetriever {
           // Get chunk content (not full note content)
           // Prefer async getter to auto-regenerate on cache miss; fall back to sync for test mocks
           let chunkContent = "";
-          const cm: unknown = this.chunkManager as any;
+          const cm = this.chunkManager;
           if (typeof cm.getChunkText === "function") {
             chunkContent = await cm.getChunkText(result.id);
           } else if (typeof cm.getChunkTextSync === "function") {
