@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { TFile, App } from "obsidian";
 import { TypeaheadMenuPortal } from "../TypeaheadMenuPortal";
+import { TypeaheadOption } from "../TypeaheadMenuContent";
 import { useTypeaheadPlugin } from "../hooks/useTypeaheadPlugin";
 import { $replaceTriggeredTextWithPill, PillData } from "../utils/lexicalTextUtils";
 import {
@@ -186,7 +187,7 @@ export function AtMentionCommandPlugin({
     <>
       {state.isOpen && (
         <TypeaheadMenuPortal
-          options={displayOptions as any[]}
+          options={displayOptions as TypeaheadOption[]}
           selectedIndex={state.selectedIndex}
           onSelect={handleSelect}
           onHighlight={handleHighlight}

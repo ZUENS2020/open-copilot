@@ -5,6 +5,28 @@ import { logInfo, logError } from "@/logger";
 import { create, load, Orama, RawData, save } from "@orama/orama";
 import { App } from "obsidian";
 
+interface OramaDocument {
+  id: string;
+  [key: string]: unknown;
+}
+
+interface OramaRawData extends RawData {
+  docs?: {
+    docs?: Record<string, OramaDocument> | OramaDocument[];
+  };
+  index?: {
+    vectorIndexes?: {
+      embedding?: {
+        size: number;
+        vectors: Record<string, number[]>;
+      };
+    };
+  };
+  internalDocumentIDStore?: {
+    internalIdToId: string[];
+  };
+}
+
 const CHUNK_PREFIX = "copilot-index-chunk-";
 const LEGACY_INDEX_SUFFIX = ".json";
 
@@ -56,8 +78,8 @@ export class ChunkedStorage {
   private distributeDocumentsToPartitions(
     documents: unknown[],
     numPartitions: number
-  ): Map<number, any[]> {
-    const partitions = new Map<number, any[]>();
+  ): Map<number, unknown[]> {
+    const partitions = new Map<number, unknown[]>();
     const documentPartitions: Record<string, number> = {};
 
     for (let i = 0; i < numPartitions; i++) {
@@ -105,7 +127,7 @@ export class ChunkedStorage {
     }
   }
 
-  async saveDatabase(db: Orama<any>): Promise<void> {
+  async saveDatabase(db: Orama<Record<string, unknown>>): Promise<void> {
     try {
       const rawData: RawData = await save(db);
       const numPartitions = getSettings().numPartitions;
@@ -124,7 +146,8 @@ export class ChunkedStorage {
       }
 
       // NOTE: Orama RawData docs can be either an array or an object
-      const docsData = (rawData as any).docs?.docs;
+      const oramaRawData = rawData as OramaRawData;
+      const docsData = oramaRawData.docs?.docs;
       const rawDocs = Array.isArray(docsData) ? docsData : Object.values(docsData || {});
 
       if (getSettings().debug) {
@@ -171,7 +194,7 @@ export class ChunkedStorage {
         ...rawData,
         docs: { docs: {}, count: 0 },
         index: {
-          ...(rawData as any).index,
+          ...oramaRawData.index,
           vectorIndexes: undefined,
         },
       };
@@ -183,11 +206,11 @@ export class ChunkedStorage {
           index: {
             vectorIndexes: {
               embedding: {
-                size: (rawData as any).index.vectorIndexes.embedding.size,
+                size: oramaRawData.index?.vectorIndexes?.embedding?.size ?? 0,
                 vectors: Object.fromEntries(
-                  Object.entries((rawData as any).index.vectorIndexes.embedding.vectors).filter(
-                    ([id]) => docs.some((doc) => doc.id === id)
-                  )
+                  Object.entries(
+                    oramaRawData.index?.vectorIndexes?.embedding?.vectors ?? {}
+                  ).filter(([id]) => docs.some((doc) => (doc as OramaDocument).id === id))
                 ),
               },
             },
@@ -228,7 +251,7 @@ export class ChunkedStorage {
     }
   }
 
-  async loadDatabase(): Promise<Orama<any>> {
+  async loadDatabase(): Promise<Orama<Record<string, unknown>>> {
     try {
       const legacyPath = this.getLegacyPath();
 
@@ -292,8 +315,8 @@ export class ChunkedStorage {
       for (const internalId of mergedData.internalDocumentIDStore.internalIdToId) {
         // Find document in any chunk
         const doc = allChunks
-          .flatMap((chunk) => Object.values(chunk.docs.docs))
-          .find((doc: unknown) => (doc as any).id === internalId);
+          .flatMap((chunk) => Object.values((chunk.docs?.docs as Record<string, unknown>) ?? {}))
+          .find((doc: unknown) => (doc as OramaDocument).id === internalId);
 
         if (doc) {
           orderedDocs[nextDocId.toString()] = doc;

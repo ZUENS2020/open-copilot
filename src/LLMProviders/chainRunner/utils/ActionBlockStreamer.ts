@@ -1,6 +1,11 @@
 import { ToolManager } from "@/tools/toolManager";
 import { ToolResultFormatter } from "@/tools/ToolResultFormatter";
 
+interface StreamingChunk {
+  content?: string | unknown[];
+  [key: string]: unknown;
+}
+
 /**
  * ActionBlockStreamer processes streaming chunks to detect and handle writeToFile blocks.
  *
@@ -32,21 +37,29 @@ export class ActionBlockStreamer {
     };
   }
 
-  async *processChunk(chunk: unknown): AsyncGenerator<any, void, unknown> {
+  async *processChunk(chunk: unknown): AsyncGenerator<StreamingChunk, void, unknown> {
     // Handle different chunk formats
     let chunkContent = "";
+    const streamingChunk = chunk as StreamingChunk;
 
     // Handle Claude thinking model array-based content
-    if (Array.isArray(chunk.content)) {
-      for (const item of chunk.content) {
-        if (item.type === "text" && item.text != null) {
+    if (Array.isArray(streamingChunk.content)) {
+      for (const item of streamingChunk.content) {
+        if (
+          typeof item === "object" &&
+          item !== null &&
+          "type" in item &&
+          item.type === "text" &&
+          "text" in item &&
+          typeof item.text === "string"
+        ) {
           chunkContent += item.text;
         }
       }
     }
     // Handle standard string content
-    else if (chunk.content != null) {
-      chunkContent = chunk.content;
+    else if (typeof streamingChunk.content === "string") {
+      chunkContent = streamingChunk.content;
     }
 
     // Add to buffer
@@ -55,7 +68,7 @@ export class ActionBlockStreamer {
     }
 
     // Yield the original chunk as-is
-    yield chunk;
+    yield streamingChunk;
 
     // Process all complete blocks in the buffer
     let blockInfo = this.findCompleteBlock(this.buffer);
@@ -78,9 +91,10 @@ export class ActionBlockStreamer {
 
         // Format tool result using ToolResultFormatter for consistency with agent mode
         const formattedResult = ToolResultFormatter.format("writeToFile", result);
-        yield { ...chunk, content: `\n${formattedResult}\n` };
+        yield { ...streamingChunk, content: `\n${formattedResult}\n` };
       } catch (err: unknown) {
-        yield { ...chunk, content: `\nError: ${err?.message || err}\n` };
+        const errorMessage = err instanceof Error ? err.message : String(err);
+        yield { ...streamingChunk, content: `\nError: ${errorMessage}\n` };
       }
 
       // Remove processed block from buffer

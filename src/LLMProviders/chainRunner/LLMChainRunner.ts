@@ -8,13 +8,14 @@ import { BaseChainRunner } from "./BaseChainRunner";
 import { recordPromptPayload } from "./utils/promptPayloadRecorder";
 import { ThinkBlockStreamer } from "./utils/ThinkBlockStreamer";
 import { getModelKey } from "@/aiParams";
+import { MessageContentArray } from "@/types/messageContent";
 
 export class LLMChainRunner extends BaseChainRunner {
   /**
    * Construct messages array using envelope-based context (L1-L5 layers)
    * Requires context envelope - throws error if unavailable
    */
-  private async constructMessages(userMessage: ChatMessage): Promise<any[]> {
+  private async constructMessages(userMessage: ChatMessage): Promise<MessageContentArray> {
     // Require envelope for LLM chain
     if (!userMessage.contextEnvelope) {
       throw new Error(

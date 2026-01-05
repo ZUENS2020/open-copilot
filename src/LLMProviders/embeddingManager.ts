@@ -8,6 +8,18 @@ import { OpenAIEmbeddings } from "@langchain/openai";
 
 type EmbeddingConstructorType = new (config: unknown) => Embeddings;
 
+interface OpenAIEmbeddingConfig {
+  modelName: string;
+  apiKey: string;
+  timeout: number;
+  batchSize: number;
+  configuration: {
+    baseURL: string;
+    fetch: typeof fetch;
+    dangerouslyAllowBrowser: boolean;
+  };
+}
+
 export default class EmbeddingManager {
   private embeddingModels: CustomModel[];
   private static instance: EmbeddingManager;
@@ -118,7 +130,7 @@ export default class EmbeddingManager {
     }
   }
 
-  private async getEmbeddingConfig(customModel: CustomModel): Promise<any> {
+  private async getEmbeddingConfig(customModel: CustomModel): Promise<OpenAIEmbeddingConfig> {
     const settings = getSettings();
     const modelName = customModel.name;
 

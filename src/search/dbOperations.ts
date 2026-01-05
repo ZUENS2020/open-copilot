@@ -32,7 +32,7 @@ export interface OramaDocument {
 }
 
 export class DBOperations {
-  private oramaDb: Orama<any> | undefined;
+  private oramaDb: Orama<OramaDocument> | undefined;
   private chunkedStorage: ChunkedStorage | undefined;
   private isInitialized = false;
   private dbPath: string;
@@ -78,7 +78,9 @@ export class DBOperations {
     this.isInitialized = true;
   }
 
-  async initializeDB(embeddingInstance: Embeddings | undefined): Promise<Orama<any> | undefined> {
+  async initializeDB(
+    embeddingInstance: Embeddings | undefined
+  ): Promise<Orama<OramaDocument> | undefined> {
     try {
       if (!this.isInitialized) {
         this.dbPath = await this.getDbPath();
@@ -217,7 +219,7 @@ export class DBOperations {
     }
   }
 
-  public getDb(): Orama<any> | undefined {
+  public getDb(): Orama<OramaDocument> | undefined {
     if (!this.oramaDb) {
       logWarn("Database not initialized. Some features may be limited.");
     }
@@ -275,7 +277,9 @@ export class DBOperations {
     this.hasUnsavedChanges = true;
   }
 
-  private async createNewDb(embeddingInstance: Embeddings | undefined): Promise<Orama<any>> {
+  private async createNewDb(
+    embeddingInstance: Embeddings | undefined
+  ): Promise<Orama<OramaDocument>> {
     if (!embeddingInstance) {
       throw new CustomError("Embedding instance not found.");
     }
@@ -306,18 +310,18 @@ export class DBOperations {
     return db;
   }
 
-  public static async getDocsByPath(db: Orama<any>, path: string) {
+  public static async getDocsByPath(db: Orama<OramaDocument>, path: string) {
     if (!db) throw new Error("DB not initialized");
     if (!path) return;
     // Use getAllDocuments + JS filter for reliable path matching (handles Unicode/Chinese correctly)
     const allDocs = await DBOperations.getAllDocuments(db);
-    const filtered = allDocs.filter((doc: unknown) => doc.path === path);
+    const filtered = allDocs.filter((doc) => doc.path === path);
     // Return in same format as before (hits with document and score)
-    return filtered.map((doc: unknown) => ({ document: doc, score: 1 }));
+    return filtered.map((doc) => ({ document: doc, score: 1 }));
   }
 
   public static async getDocsByEmbedding(
-    db: Orama<any>,
+    db: Orama<OramaDocument>,
     embedding: number[],
     options: {
       limit: number;
@@ -334,7 +338,7 @@ export class DBOperations {
     return result.hits;
   }
 
-  public static async getLatestFileMtime(db: Orama<any> | undefined): Promise<number> {
+  public static async getLatestFileMtime(db: Orama<OramaDocument> | undefined): Promise<number> {
     if (!db) throw new Error("DB not initialized");
 
     try {
@@ -540,7 +544,7 @@ export class DBOperations {
     return false;
   }
 
-  public static async getAllDocuments(db: Orama<any>): Promise<any[]> {
+  public static async getAllDocuments(db: Orama<OramaDocument>): Promise<OramaDocument[]> {
     const result = await search(db, {
       term: "",
       limit: 100000,
@@ -685,12 +689,12 @@ export class DBOperations {
     });
   }
 
-  async getDocsJsonByPaths(paths: string[]): Promise<Record<string, any[]>> {
+  async getDocsJsonByPaths(paths: string[]): Promise<Record<string, OramaDocument[]>> {
     if (!this.oramaDb) {
       throw new CustomError("Semantic index database not found.");
     }
 
-    const result: Record<string, any[]> = {};
+    const result: Record<string, OramaDocument[]> = {};
 
     for (const path of paths) {
       const docs = await DBOperations.getDocsByPath(this.oramaDb, path);
@@ -706,6 +710,9 @@ export class DBOperations {
           tags: hit.document.tags,
           extension: hit.document.extension,
           nchars: hit.document.nchars,
+          created_at: hit.document.created_at,
+          ctime: hit.document.ctime,
+          mtime: hit.document.mtime,
         }));
       }
     }

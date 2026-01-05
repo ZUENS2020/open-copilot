@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { TFile } from "obsidian";
 import { TypeaheadMenuPopover } from "./TypeaheadMenuPopover";
+import { TypeaheadOption } from "./TypeaheadMenuContent";
 import {
   useAtMentionCategories,
   AtMentionCategory,
@@ -159,7 +160,7 @@ export function AtMentionTypeahead({
 
   return (
     <TypeaheadMenuPopover
-      options={searchResults as any[]}
+      options={searchResults as TypeaheadOption[]}
       selectedIndex={selectedIndex}
       onSelect={handleSelect}
       onHighlight={handleHighlight}

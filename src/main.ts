@@ -639,7 +639,11 @@ export default class CopilotPlugin extends Plugin {
     await this.handleNewChat();
   }
 
-  async customSearchDB(query: string, salientTerms: string[], textWeight: number): Promise<any[]> {
+  async customSearchDB(
+    query: string,
+    salientTerms: string[],
+    textWeight: number
+  ): Promise<Array<{ content: string; metadata: Record<string, unknown> }>> {
     const settings = getSettings();
     const retriever = settings.enableSemanticSearchV3
       ? new (await import("@/search/v3/MergedSemanticRetriever")).MergedSemanticRetriever(
