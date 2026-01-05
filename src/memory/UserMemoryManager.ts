@@ -110,7 +110,8 @@ export class UserMemoryManager {
       );
       return result;
     } catch (error) {
-      return { error: "Error saving memory: " + error.message };
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      return { error: `Error saving memory: ${errorMessage}` };
     }
   }
 
@@ -295,7 +296,8 @@ ${query.trim()}
       const response = await chatModel.invoke(messages_llm);
       updatedContent = response.text ?? "";
     } catch (error) {
-      return { error: "LLM call failed while updating saved memories: " + error.message };
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      return { error: `LLM call failed while updating saved memories: ${errorMessage}` };
     }
     if (updatedContent == null || updatedContent.trim() === "") {
       return { error: "Empty content returned from LLM" };

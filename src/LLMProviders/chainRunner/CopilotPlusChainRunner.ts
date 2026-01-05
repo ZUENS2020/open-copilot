@@ -328,7 +328,7 @@ OUTPUT ONLY XML - NO OTHER TEXT.`;
     return processedImages;
   }
 
-  private async extractEmbeddedImages(content: string, sourcePath?: string): Promise<string[]> {
+  private extractEmbeddedImages(content: string, sourcePath?: string): string[] {
     // Match both wiki-style ![[image.ext]] and standard markdown ![alt](image.ext)
     const wikiImageRegex = /!\[\[(.*?\.(png|jpg|jpeg|gif|webp|bmp|svg))\]\]/g;
     // Updated regex to handle URLs with or without file extensions
@@ -452,7 +452,7 @@ OUTPUT ONLY XML - NO OTHER TEXT.`;
               "[CopilotPlus] Extracting images from active note only:",
               sourcePath || "no source path"
             );
-            const embeddedImages = await this.extractEmbeddedImages(activeNoteContent, sourcePath);
+            const embeddedImages = this.extractEmbeddedImages(activeNoteContent, sourcePath);
             if (embeddedImages.length > 0) {
               imageSources.push({ urls: embeddedImages, type: "embedded" });
             }

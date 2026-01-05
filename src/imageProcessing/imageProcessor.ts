@@ -193,7 +193,7 @@ export class ImageProcessor {
       const arrayBuffer = await vault.readBinary(file);
 
       // Validate MIME type
-      const mimeType = await this.getMimeType(arrayBuffer, file.extension);
+      const mimeType = ImageProcessor.getMimeType(arrayBuffer, file.extension);
       if (!mimeType.startsWith("image/")) {
         logError(`Invalid MIME type: ${mimeType}, skipping: ${file.path}`);
         return null;
@@ -263,7 +263,7 @@ export class ImageProcessor {
       const arrayBuffer = await vault.readBinary(file);
 
       // Validate MIME type
-      const mimeType = await this.getMimeType(arrayBuffer, file.extension);
+      const mimeType = ImageProcessor.getMimeType(arrayBuffer, file.extension);
       if (!mimeType.startsWith("image/")) {
         logError(`Invalid MIME type: ${mimeType}, path: ${localPath}`);
         return null;
@@ -327,7 +327,7 @@ export class ImageProcessor {
     };
   }
 
-  private static async getMimeType(arrayBuffer: ArrayBuffer, extension: string): Promise<string> {
+  private static getMimeType(arrayBuffer: ArrayBuffer, extension: string): string {
     // Get the first few bytes to check for magic numbers
     const bytes = new Uint8Array(arrayBuffer.slice(0, 4));
 

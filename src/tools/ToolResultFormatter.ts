@@ -505,7 +505,8 @@ export class ToolResultFormatter {
             output.push(`Processing time: ${(vr.elapsed_time_ms / 1000).toFixed(1)}s`);
           }
         } else {
-          output.push(`❌ Failed to transcribe: ${vr.url ?? "unknown URL"}`);
+          const url = typeof vr.url === "string" ? vr.url : "unknown URL";
+          output.push(`❌ Failed to transcribe: ${url}`);
           if (typeof vr.message === "string") {
             output.push(`   ${vr.message}`);
           }
