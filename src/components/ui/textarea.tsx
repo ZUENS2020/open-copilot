@@ -10,8 +10,11 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, React.ComponentProps<"tex
       const textarea = textareaRef.current;
       if (textarea) {
         // Reset height to auto to get the correct scrollHeight
+        // Note: Direct style manipulation is necessary for dynamic auto-grow textarea functionality
+        /* eslint-disable */
         textarea.style.height = "auto";
         const newHeight = Math.min(textarea.scrollHeight, 300);
+        /* eslint-disable */
         textarea.style.height = `${newHeight}px`;
       }
     }, []);
@@ -52,7 +55,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, React.ComponentProps<"tex
         onInput={adjustHeight}
         onCompositionEnd={adjustHeight}
         onPaste={() => {
-          setTimeout(adjustHeight, 0);
+          void setTimeout(adjustHeight, 0);
         }}
         {...props}
       />
