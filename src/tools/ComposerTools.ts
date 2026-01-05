@@ -49,14 +49,14 @@ async function show_preview(file_path: string, content: string): Promise<ApplyVi
   const file = await getFile(file_path);
   const activeFile = app.workspace.getActiveFile();
 
-  if (file && (!activeFile || activeFile.path !== file_path)) {
+  if (file instanceof TFile && (!activeFile || activeFile.path !== file_path)) {
     // If target file is not the active file, open the target file in the current leaf
-    await app.workspace.getLeaf().openFile(file as TFile);
+    await app.workspace.getLeaf().openFile(file);
   }
 
   let originalContent = "";
-  if (file) {
-    originalContent = await app.vault.read(file as TFile);
+  if (file instanceof TFile) {
+    originalContent = await app.vault.read(file);
   }
   const changes = diffTrimmedLines(originalContent, content, {
     newlineIsToken: true,

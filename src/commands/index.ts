@@ -292,16 +292,16 @@ export function registerCommands(
       await ensureFolderExists(folderPath);
 
       const existingFile = plugin.app.vault.getAbstractFileByPath(filePath);
-      if (existingFile) {
-        await plugin.app.vault.modify(existingFile as TFile, content);
+      if (existingFile instanceof TFile) {
+        await plugin.app.vault.modify(existingFile, content);
       } else {
         await plugin.app.vault.create(filePath, content);
       }
 
       // Open the file
       const file = plugin.app.vault.getAbstractFileByPath(filePath);
-      if (file) {
-        await plugin.app.workspace.getLeaf().openFile(file as TFile);
+      if (file instanceof TFile) {
+        await plugin.app.workspace.getLeaf().openFile(file);
         new Notice(`Listed ${indexedFiles.size} indexed files`);
       }
     } catch (error) {
@@ -364,15 +364,15 @@ export function registerCommands(
       await ensureFolderExists(folderPath);
 
       const existingFile = plugin.app.vault.getAbstractFileByPath(filePath);
-      if (existingFile) {
-        await plugin.app.vault.modify(existingFile as TFile, content);
+      if (existingFile instanceof TFile) {
+        await plugin.app.vault.modify(existingFile, content);
       } else {
         await plugin.app.vault.create(filePath, content);
       }
 
       const file = plugin.app.vault.getAbstractFileByPath(filePath);
-      if (file) {
-        await plugin.app.workspace.getLeaf().openFile(file as TFile);
+      if (file instanceof TFile) {
+        await plugin.app.workspace.getLeaf().openFile(file);
         new Notice(`Embedding debug info for ${chunks.length} chunk(s)`);
       }
     } catch (error) {
