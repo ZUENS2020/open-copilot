@@ -2,6 +2,7 @@ import { ChainType } from "@/chainFactory";
 import { logInfo } from "@/logger";
 import { ChatManager } from "@/core/ChatManager";
 import { ChatMessage, MessageContext } from "@/types/message";
+import { MessageContentArray } from "@/types/messageContent";
 import { TFile } from "obsidian";
 
 /**
@@ -62,7 +63,7 @@ export class ChatUIState {
     context: MessageContext,
     chainType: ChainType,
     includeActiveNote: boolean = false,
-    content?: any[]
+    content?: MessageContentArray
   ): Promise<string> {
     const messageId = await this.chatManager.sendMessage(
       displayText,

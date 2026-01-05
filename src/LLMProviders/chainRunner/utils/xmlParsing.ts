@@ -29,7 +29,7 @@ export function escapeXmlAttribute(str: string): string {
 
 export interface ToolCall {
   name: string;
-  args: any;
+  args: Record<string, unknown>;
 }
 
 /**
@@ -58,7 +58,7 @@ export function parseXMLToolCalls(text: string): ToolCall[] {
         }
 
         // Parse individual XML parameters using pure XML approach
-        const args: any = {};
+        const args: Record<string, unknown> = {};
 
         // Remove the name tag from content to avoid matching it
         const contentWithoutName = content.replace(/<name>[\s\S]*?<\/name>/, "");
@@ -104,7 +104,7 @@ export function parseXMLToolCalls(text: string): ToolCall[] {
  * - Simple strings: just the text value
  * - Empty content: returns appropriate empty value based on parameter name
  */
-function parseParameterContent(content: string, parameterName?: string): any {
+function parseParameterContent(content: string, parameterName?: string): unknown {
   if (!content) {
     // Special handling for known array parameters that should default to empty arrays
     if (parameterName === "chatHistory" || parameterName === "salientTerms") {
@@ -144,7 +144,7 @@ function parseParameterContent(content: string, parameterName?: string): any {
 
   // Check if it's an object format with key-value pairs
   const objectRegex = /<([^>]+)>([\s\S]*?)<\/\1>/g;
-  const objectEntries: [string, any][] = [];
+  const objectEntries: [string, unknown][] = [];
   let objectMatch;
 
   while ((objectMatch = objectRegex.exec(content)) !== null) {

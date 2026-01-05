@@ -12,6 +12,12 @@ import {
   SELECTED_TEXT_TAG,
   DATAVIEW_BLOCK_TAG,
 } from "./constants";
+import {
+  DataviewApi,
+  DataviewResult,
+  formatDataviewResult as formatDataviewResultTyped,
+  isDataviewPlugin,
+} from "@/types/dataview";
 
 interface EmbeddedLinkTarget {
   path: string | null;
@@ -72,8 +78,9 @@ export class ContextProcessor {
    */
   async processDataviewBlocks(content: string, sourcePath: string): Promise<string> {
     // Check if Dataview plugin is available
-    const dataviewPlugin = (app as any).plugins?.plugins?.dataview;
-    if (!dataviewPlugin) {
+    const dataviewPlugin = (app as { plugins?: { plugins?: Record<string, unknown> } }).plugins
+      ?.plugins?.dataview;
+    if (!isDataviewPlugin(dataviewPlugin)) {
       return content; // Dataview not installed, return content as-is
     }
 
@@ -121,7 +128,7 @@ export class ContextProcessor {
    * Execute a Dataview query and format the results
    */
   private async executeDataviewQuery(
-    dataviewApi: any,
+    dataviewApi: DataviewApi,
     query: string,
     queryType: string,
     sourcePath: string
@@ -145,88 +152,9 @@ export class ContextProcessor {
   /**
    * Format Dataview query results into readable text
    */
-  private formatDataviewResult(result: any): string {
-    if (!result) {
-      return "No results";
-    }
-
-    // Handle different result types
-    if (result.type === "list") {
-      return this.formatDataviewList(result.values);
-    } else if (result.type === "table") {
-      return this.formatDataviewTable(result.headers, result.values);
-    } else if (result.type === "task") {
-      return this.formatDataviewTasks(result.values);
-    } else if (Array.isArray(result)) {
-      return result.map((item) => this.formatDataviewValue(item)).join("\n");
-    }
-
-    return String(result);
-  }
-
-  /**
-   * Format Dataview list results
-   */
-  private formatDataviewList(values: any[]): string {
-    if (!values || values.length === 0) {
-      return "No results";
-    }
-    return values.map((item) => `- ${this.formatDataviewValue(item)}`).join("\n");
-  }
-
-  /**
-   * Format Dataview table results
-   */
-  private formatDataviewTable(headers: string[], rows: any[][]): string {
-    if (!rows || rows.length === 0) {
-      return "No results";
-    }
-
-    // Create markdown table
-    let table = `| ${headers.join(" | ")} |\n`;
-    table += `| ${headers.map(() => "---").join(" | ")} |\n`;
-
-    for (const row of rows) {
-      table += `| ${row.map((cell) => this.formatDataviewValue(cell)).join(" | ")} |\n`;
-    }
-
-    return table;
-  }
-
-  /**
-   * Format Dataview task results
-   */
-  private formatDataviewTasks(tasks: any[]): string {
-    if (!tasks || tasks.length === 0) {
-      return "No results";
-    }
-    return tasks
-      .map((task) => {
-        const checkbox = task.completed ? "[x]" : "[ ]";
-        return `- ${checkbox} ${this.formatDataviewValue(task.text || task)}`;
-      })
-      .join("\n");
-  }
-
-  /**
-   * Format individual Dataview values
-   */
-  private formatDataviewValue(value: any): string {
-    if (value === null || value === undefined) {
-      return "";
-    }
-
-    // Handle links
-    if (value && typeof value === "object" && value.path) {
-      return `[[${value.path}]]`;
-    }
-
-    // Handle arrays
-    if (Array.isArray(value)) {
-      return value.map((v) => this.formatDataviewValue(v)).join(", ");
-    }
-
-    return String(value);
+  private formatDataviewResult(result: DataviewResult): string {
+    // Use the typed function from dataview.ts
+    return formatDataviewResultTyped(result);
   }
 
   /**

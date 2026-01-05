@@ -3,6 +3,7 @@ import { ChainType } from "@/chainFactory";
 import { getCurrentProject } from "@/aiParams";
 import { logInfo } from "@/logger";
 import { ChatMessage, MessageContext } from "@/types/message";
+import { MessageContentArray } from "@/types/messageContent";
 import { FileParserManager } from "@/tools/FileParserManager";
 import ChainManager from "@/LLMProviders/chainManager";
 import ProjectManager from "@/LLMProviders/projectManager";
@@ -120,7 +121,7 @@ export class ChatManager {
     context: MessageContext,
     chainType: ChainType,
     includeActiveNote: boolean = false,
-    content?: any[]
+    content?: MessageContentArray
   ): Promise<string> {
     try {
       logInfo(`[ChatManager] Sending message: "${displayText}"`);

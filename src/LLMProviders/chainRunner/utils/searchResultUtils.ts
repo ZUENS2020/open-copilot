@@ -1,4 +1,5 @@
 import { logInfo, logWarn, logMarkdownBlock, logTable } from "@/logger";
+import { SearchResultDocument } from "@/types/langchain";
 
 /**
  * Formats localSearch results as structured text for LLM consumption
@@ -6,7 +7,7 @@ import { logInfo, logWarn, logMarkdownBlock, logTable } from "@/logger";
  * @param searchResults - The raw search results from localSearch tool
  * @returns Formatted text string for LLM
  */
-export function formatSearchResultsForLLM(searchResults: any[]): string {
+export function formatSearchResultsForLLM(searchResults: SearchResultDocument[]): string {
   if (!Array.isArray(searchResults)) {
     return "";
   }
@@ -20,11 +21,14 @@ export function formatSearchResultsForLLM(searchResults: any[]): string {
 
   // Format each document with essential metadata
   const formattedDocs = includedDocs
-    .map((doc: any, idx: number) => {
+    .map((doc: SearchResultDocument, idx: number) => {
       const title = doc.title || "Untitled";
       const path = doc.path || "";
       // Optional stable source id if provided by caller; fallback to order
-      const sourceId = (doc as any).__sourceId || (doc as any).source_id || idx + 1;
+      const sourceId =
+        (doc as { __sourceId?: number; source_id?: number }).__sourceId ||
+        (doc as { source_id?: number }).source_id ||
+        idx + 1;
 
       // Safely handle mtime - check validity before converting
       let modified: string | null = null;
@@ -84,13 +88,13 @@ export function formatSearchResultStringForLLM(resultString: string): string {
  * @returns Sources array with explanation preserved for UI
  */
 export function extractSourcesFromSearchResults(
-  searchResults: any[]
-): { title: string; path: string; score: number; explanation?: any }[] {
+  searchResults: SearchResultDocument[]
+): { title: string; path: string; score: number; explanation?: string | unknown }[] {
   if (!Array.isArray(searchResults)) {
     return [];
   }
 
-  return searchResults.map((doc: any) => ({
+  return searchResults.map((doc: SearchResultDocument) => ({
     title: doc.title || doc.path || "Untitled",
     path: doc.path || doc.title || "",
     score: doc.rerank_score || doc.score || 0,
@@ -118,7 +122,7 @@ function toIsoString(ts: unknown): string {
  * Create a concise, single-line summary of an explanation object.
  * Includes lexical matches, semantic score, folder/graph boosts, and score adjustments.
  */
-export function summarizeExplanation(explanation: any): string {
+export function summarizeExplanation(explanation: unknown): string {
   if (!explanation) return "";
 
   const parts: string[] = [];
@@ -196,7 +200,7 @@ export function summarizeExplanation(explanation: any): string {
  *   # | CHUNK/PATH                              | TITLE        | CTIME                | MTIME                | SCORE  | EXPLANATION
  *   1 | notes/file.md#3                         | File         | 2024-09-01T...      | 2024-09-10T...      | 0.8123 | Lexical(body): term1, term2 | Graph 2.0 (3 backlinks)
  */
-export function logSearchResultsDebugTable(searchResults: any[]): void {
+export function logSearchResultsDebugTable(searchResults: SearchResultDocument[]): void {
   if (!Array.isArray(searchResults) || searchResults.length === 0) {
     logInfo("Search Results: (none)");
     return;
@@ -212,7 +216,7 @@ export function logSearchResultsDebugTable(searchResults: any[]): void {
   };
 
   let includedCount = 0;
-  const rows: Row[] = searchResults.map((doc: any, i: number) => {
+  const rows: Row[] = searchResults.map((doc: SearchResultDocument, i: number) => {
     const mtime = toIsoString(doc.mtime);
     const scoreNum = typeof doc.rerank_score === "number" ? doc.rerank_score : doc.score || 0;
     const score = (Number.isFinite(scoreNum) ? scoreNum : 0).toFixed(4);

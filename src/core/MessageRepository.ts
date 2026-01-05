@@ -1,6 +1,7 @@
 import { PromptContextEnvelope } from "@/context/PromptContextTypes";
 import { formatDateTime } from "@/utils";
 import { ChatMessage, MessageContext, NewChatMessage, StoredMessage } from "@/types/message";
+import { MessageContentArray } from "@/types/messageContent";
 import { logInfo } from "@/logger";
 
 /**
@@ -34,14 +35,14 @@ export class MessageRepository {
     processedText: string,
     sender: string,
     context?: MessageContext,
-    content?: any[]
+    content?: MessageContentArray
   ): string;
   addMessage(
     messageOrDisplayText: NewChatMessage | string,
     processedText?: string,
     sender?: string,
     context?: MessageContext,
-    content?: any[]
+    content?: MessageContentArray
   ): string {
     // If first parameter is a ChatMessage object
     if (typeof messageOrDisplayText === "object") {

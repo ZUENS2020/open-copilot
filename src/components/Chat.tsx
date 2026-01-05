@@ -39,6 +39,7 @@ import { updateSetting, useSettingsValue } from "@/settings/model";
 import { ChatUIState } from "@/state/ChatUIState";
 import { FileParserManager } from "@/tools/FileParserManager";
 import { ChatMessage } from "@/types/message";
+import { MessageContentArray } from "@/types/messageContent";
 import { err2String, isPlusChain } from "@/utils";
 import { arrayBufferToBase64 } from "@/utils/base64";
 import { Notice, TFile } from "obsidian";
@@ -197,7 +198,7 @@ const ChatInternal: React.FC<ChatProps & { chatInput: ReturnType<typeof useChatI
 
     try {
       // Create message content array
-      const content: any[] = [];
+      const content: MessageContentArray = [];
 
       // Add text content if present
       if (inputMessage) {
