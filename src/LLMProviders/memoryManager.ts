@@ -1,6 +1,7 @@
 import { getSettings, subscribeToSettingsChange } from "@/settings/model";
 import { BaseChatMemory, BufferWindowMemory } from "@langchain/classic/memory";
 import { BaseChatMessageHistory } from "@langchain/core/chat_history";
+import { logInfo } from "@/logger";
 
 export default class MemoryManager {
   private static instance: MemoryManager;
@@ -33,7 +34,7 @@ export default class MemoryManager {
       chatHistory: chatHistory,
     });
     if (this.debug) {
-      console.log("Memory initialized with context turns:", chatContextTurns);
+      logInfo("Memory initialized with context turns:", chatContextTurns);
     }
   }
 
@@ -42,18 +43,21 @@ export default class MemoryManager {
   }
 
   async clearChatMemory(): Promise<void> {
-    if (this.debug) console.log("Clearing chat memory");
+    if (this.debug) logInfo("Clearing chat memory");
     await this.memory.clear();
   }
 
-  async loadMemoryVariables(): Promise<any> {
+  async loadMemoryVariables(): Promise<Record<string, unknown>> {
     const variables = await this.memory.loadMemoryVariables({});
-    if (this.debug) console.log("Loaded memory variables:", variables);
+    if (this.debug) logInfo("Loaded memory variables:", variables);
     return variables;
   }
 
-  async saveContext(input: any, output: any): Promise<void> {
-    if (this.debug) console.log("Saving to memory - Input:", input, "Output:", output);
+  async saveContext(
+    input: Record<string, unknown>,
+    output: Record<string, unknown>
+  ): Promise<void> {
+    if (this.debug) logInfo("Saving to memory - Input:", input, "Output:", output);
     await this.memory.saveContext(input, output);
   }
 }

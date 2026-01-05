@@ -78,7 +78,7 @@ export class HybridRetriever extends BaseRetriever {
       // Add check for empty array
       if (combinedChunks.length === 0) {
         if (getSettings().debug) {
-          console.log("No chunks found for query:", query);
+          logInfo("No chunks found for query:", query);
         }
         return finalChunks;
       }
@@ -115,21 +115,21 @@ export class HybridRetriever extends BaseRetriever {
       }
 
       if (getSettings().debug) {
-        console.log("*** HYBRID RETRIEVER DEBUG INFO: ***");
+        logInfo("*** HYBRID RETRIEVER DEBUG INFO: ***");
 
         if (config?.runName !== "no_hyde") {
-          console.log("\nOriginal Query: ", query);
-          console.log("Rewritten Query: ", rewrittenQuery);
+          logInfo("\nOriginal Query: ", query);
+          logInfo("Rewritten Query: ", rewrittenQuery);
         }
 
-        console.log("\nExplicit Chunks: ", explicitChunks);
-        console.log("Orama Chunks: ", oramaChunks);
-        console.log("Combined Chunks: ", combinedChunks);
-        console.log("Max Orama Score: ", maxOramaScore);
+        logInfo("\nExplicit Chunks: ", explicitChunks);
+        logInfo("Orama Chunks: ", oramaChunks);
+        logInfo("Combined Chunks: ", combinedChunks);
+        logInfo("Max Orama Score: ", maxOramaScore);
         if (shouldRerank) {
-          console.log("Reranked Chunks: ", finalChunks);
+          logInfo("Reranked Chunks: ", finalChunks);
         } else {
-          console.log("No reranking applied.");
+          logInfo("No reranking applied.");
         }
       }
 
@@ -245,7 +245,7 @@ export class HybridRetriever extends BaseRetriever {
 
       if (tagOnlyQuery) {
         if (getSettings().debug) {
-          console.log("Tag only query detected, setting textWeight to 1 and vectorWeight to 0.");
+          logInfo("Tag only query detected, setting textWeight to 1 and vectorWeight to 0.");
         }
         textWeight = 1;
         vectorWeight = 0;

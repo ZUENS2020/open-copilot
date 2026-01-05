@@ -7,7 +7,7 @@ import { BaseChatModel } from "@langchain/core/language_models/chat_models";
 import { ChatOpenAI } from "@langchain/openai";
 
 type ChatConstructorType = {
-  new (config: any): any;
+  new (config: unknown): BaseChatModel;
 };
 
 export default class ChatModelManager {

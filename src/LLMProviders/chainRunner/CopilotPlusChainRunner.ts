@@ -58,8 +58,8 @@ import ProjectManager from "@/LLMProviders/projectManager";
 import { isProjectMode } from "@/aiParams";
 
 type ToolCallWithExecutor = {
-  tool: any;
-  args: any;
+  tool: SimpleTool<any, any>;
+  args: Record<string, unknown>;
 };
 
 export class CopilotPlusChainRunner extends BaseChainRunner {

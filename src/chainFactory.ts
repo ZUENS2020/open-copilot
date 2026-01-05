@@ -9,6 +9,7 @@ import { RunnablePassthrough, RunnableSequence } from "@langchain/core/runnables
 import { BaseChatMemory } from "@langchain/classic/memory";
 import { formatDocumentsAsString } from "@langchain/classic/util/document";
 import { removeErrorTags, removeThinkTags } from "./utils";
+import { logInfo } from "@/logger";
 
 export interface LLMChainInput {
   llm: BaseLanguageModel;
@@ -85,7 +86,7 @@ class ChainFactory {
       model,
     ]);
     ChainFactory.instances.set(ChainType.LLM_CHAIN, instance);
-    console.log("New LLM chain created.");
+    logInfo("New LLM chain created.");
     return instance;
   }
 
@@ -168,12 +169,12 @@ Question: {question}
     const standaloneQuestionChain = RunnableSequence.from([
       {
         question: (input: ConversationalRetrievalQAChainInput) => {
-          if (debug) console.log("Input Question: ", input.question);
+          if (debug) logInfo("Input Question: ", input.question);
           return input.question;
         },
         chat_history: (input: ConversationalRetrievalQAChainInput) => {
           const formattedChatHistory = formatChatHistory(input.chat_history);
-          if (debug) console.log("Formatted Chat History: ", formattedChatHistory);
+          if (debug) logInfo("Formatted Chat History: ", formattedChatHistory);
           return formattedChatHistory;
         },
       },
@@ -183,7 +184,7 @@ Question: {question}
       (output) => {
         const thinkTagsCleaned = removeThinkTags(output);
         const cleanedOutput = removeErrorTags(thinkTagsCleaned);
-        if (debug) console.log("Standalone Question: ", cleanedOutput);
+        if (debug) logInfo("Standalone Question: ", cleanedOutput);
         return cleanedOutput;
       },
     ]);

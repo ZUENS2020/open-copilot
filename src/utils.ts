@@ -14,7 +14,7 @@ export { err2String } from "@/errorFormat";
 
 // Add custom error type at the top of the file
 interface APIError extends Error {
-  json?: any;
+  json?: Record<string, unknown>;
 }
 
 // Error message constants
@@ -32,26 +32,28 @@ export interface ErrorDetail {
   reason?: string;
 }
 
-export function extractErrorDetail(error: any): ErrorDetail {
-  const errorDetail = error?.detail || {};
+export function extractErrorDetail(error: unknown): ErrorDetail {
+  const err = error as { detail?: ErrorDetail; message?: string; status?: number };
+  const errorDetail = err?.detail || {};
   return {
     status: errorDetail.status,
-    message: errorDetail.message || error?.message,
+    message: errorDetail.message || err?.message,
     reason: errorDetail.reason,
   };
 }
 
-export function isLicenseKeyError(error: any): boolean {
+export function isLicenseKeyError(error: unknown): boolean {
+  const err = error as { detail?: ErrorDetail; message?: string };
   const errorDetail = extractErrorDetail(error);
   return (
     errorDetail.reason === "Invalid license key" ||
-    error?.message === "Invalid license key" ||
-    error?.message?.includes("status 403") ||
+    err?.message === "Invalid license key" ||
+    err?.message?.includes("status 403") ||
     errorDetail.status === 403
   );
 }
 
-export function getApiErrorMessage(error: any): string {
+export function getApiErrorMessage(error: unknown): string {
   const errorDetail = extractErrorDetail(error);
   if (isLicenseKeyError(error)) {
     return ERROR_MESSAGES.INVALID_LICENSE_KEY_USER;
@@ -584,7 +586,7 @@ export function extractUniqueTitlesFromDocs(docs: Document[]): string[] {
   return Array.from(titlesSet);
 }
 
-export function extractJsonFromCodeBlock(content: string): any {
+export function extractJsonFromCodeBlock(content: string): unknown {
   const codeBlockMatch = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
   const jsonContent = codeBlockMatch ? codeBlockMatch[1].trim() : content.trim();
   return JSON.parse(jsonContent);
@@ -1019,14 +1021,16 @@ export function getMessageRole(
  * Extracts text content from a message chunk that could be either a string
  * or an array of content objects (Claude 3.7 format)
  */
-export function extractTextFromChunk(content: any): string {
+export function extractTextFromChunk(
+  content: string | Array<{ type: string; text?: string }>
+): string {
   if (typeof content === "string") {
     return content;
   }
   if (Array.isArray(content)) {
     return content
       .filter((item) => item.type === "text")
-      .map((item) => item.text)
+      .map((item) => item.text || "")
       .join("");
   }
   // For any other type, try to convert to string or return empty
@@ -1034,13 +1038,13 @@ export function extractTextFromChunk(content: any): string {
 }
 
 /**
- * Removes any <think> tags and their content from the text.
+ * Removes any<think> tags and their content from the text.
  * This is used to clean model outputs before using them for RAG.
  * Handles both string content and array-based content (Claude 3.7 format)
  * @param text - The text or content array to remove think tags from
  * @returns The text with think tags removed
  */
-export function removeThinkTags(text: any): string {
+export function removeThinkTags(text: string | Array<{ type: string; text?: string }>): string {
   // First convert any content format to plain text
   const plainText = extractTextFromChunk(text);
   // Remove complete think tags and their content
@@ -1057,7 +1061,7 @@ export function removeThinkTags(text: any): string {
  * @param text - The text or content array to remove error tags from
  * @returns The text with error tags removed
  */
-export function removeErrorTags(text: any): string {
+export function removeErrorTags(text: string | Array<{ type: string; text?: string }>): string {
   // First convert any content format to plain text
   const plainText = extractTextFromChunk(text);
   // Then remove error tags

@@ -361,7 +361,7 @@ const ChatInternal: React.FC<ChatProps & { chatInput: ReturnType<typeof useChatI
         if (!success) {
           new Notice("Failed to regenerate message. Please try again.");
         } else if (settings.debug) {
-          console.log("Message regenerated successfully");
+          logInfo("Message regenerated successfully");
         }
 
         // Autosave the chat if the setting is enabled

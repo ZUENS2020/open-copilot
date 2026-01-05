@@ -639,6 +639,73 @@ If your plugin does not need CSS, delete this file.
   margin-left: auto;
 }
 
+.copilot-notice-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.copilot-notice-stop-button {
+  margin-left: 8px;
+}
+
+.copilot-settings-container {
+  user-select: text;
+}
+
+/* Sources Modal Styles */
+.copilot-sources-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.copilot-sources-item {
+  margin-bottom: 1em;
+}
+
+.copilot-sources-item-container {
+  cursor: pointer;
+}
+
+.copilot-sources-expand-indicator {
+  margin-right: 0.5em;
+  display: inline-block;
+  width: 1em;
+  transition: transform 0.2s;
+}
+
+.copilot-sources-expand-indicator-expanded {
+  transform: rotate(90deg);
+}
+
+.copilot-sources-explanation {
+  margin-top: 0.5em;
+  margin-left: 2.5em;
+  font-size: 0.9em;
+  color: var(--text-muted);
+  border-left: 2px solid var(--background-modifier-border);
+  padding-left: 0.5em;
+}
+
+.copilot-sources-explanation-collapsed {
+  display: none;
+}
+
+.copilot-sources-explanation-expanded {
+  display: block;
+}
+
+.copilot-sources-explanation-detail {
+  margin-bottom: 0.25em;
+}
+
+.copilot-context-manage-modal {
+  min-width: 50vw;
+}
+
+.copilot-hidden-file-input {
+  display: none;
+}
+
 .similar-notes-modal-container {
   width: 80vw;
   height: 80vh;

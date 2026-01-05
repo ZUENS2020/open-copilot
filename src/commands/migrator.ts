@@ -37,7 +37,16 @@ async function saveUnsupportedCommands(commands: CustomCommand[]) {
 /** Migrates the legacy commands in data.json to the new note format. */
 export async function migrateCommands() {
   const settings = getSettings();
-  const legacyCommands = (settings as any).inlineEditCommands;
+  const legacyCommands = (
+    settings as {
+      inlineEditCommands?: Array<{
+        name: string;
+        prompt: string;
+        showInContextMenu?: boolean;
+        modelKey?: string;
+      }>;
+    }
+  ).inlineEditCommands;
   if (!legacyCommands || legacyCommands.length === 0) {
     return;
   }
@@ -45,7 +54,7 @@ export async function migrateCommands() {
   const unsupportedCommands: CustomCommand[] = [];
   const existingCommands = getCachedCustomCommands();
 
-  const commands = legacyCommands.map((command: any, index: number) => ({
+  const commands = legacyCommands.map((command, index: number) => ({
     title: command.name,
     content: command.prompt,
     showInContextMenu: command.showInContextMenu,

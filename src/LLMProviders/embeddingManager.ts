@@ -6,7 +6,7 @@ import { safeFetch } from "@/utils";
 import { Embeddings } from "@langchain/core/embeddings";
 import { OpenAIEmbeddings } from "@langchain/openai";
 
-type EmbeddingConstructorType = new (config: any) => Embeddings;
+type EmbeddingConstructorType = new (config: unknown) => Embeddings;
 
 export default class EmbeddingManager {
   private embeddingModels: CustomModel[];
@@ -62,11 +62,11 @@ export default class EmbeddingManager {
   }
 
   static getModelName(embeddingsInstance: Embeddings): string {
-    const emb = embeddingsInstance as any;
+    const emb = embeddingsInstance as { model?: string; modelName?: string };
     if ("model" in emb && emb.model) {
-      return emb.model as string;
+      return emb.model;
     } else if ("modelName" in emb && emb.modelName) {
-      return emb.modelName as string;
+      return emb.modelName;
     } else {
       throw new Error(
         `Embeddings instance missing model or modelName properties: ${embeddingsInstance}`
@@ -95,7 +95,7 @@ export default class EmbeddingManager {
     }
 
     const modelKey = customModel.id;
-    if (!EmbeddingManager.modelMap.hasOwnProperty(modelKey)) {
+    if (!Object.hasOwn(EmbeddingManager.modelMap, modelKey)) {
       throw new CustomError(`No embedding model found for: ${modelKey}`);
     }
 

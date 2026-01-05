@@ -14,7 +14,7 @@ export class AddImageModal {
     input.type = "file";
     input.accept = "image/*";
     input.multiple = true;
-    input.style.display = "none";
+    input.addClass("copilot-hidden-file-input");
 
     input.addEventListener("change", () => {
       const files = Array.from(input.files || []);

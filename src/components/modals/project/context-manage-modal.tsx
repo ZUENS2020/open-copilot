@@ -1192,7 +1192,7 @@ export class ContextManageModal extends Modal {
     const { contentEl, modalEl } = this;
     this.root = createRoot(contentEl);
 
-    modalEl.style.minWidth = "50vw";
+    modalEl.addClass("copilot-context-manage-modal");
 
     const handleSave = (project: ProjectConfig) => {
       this.onSave(project);

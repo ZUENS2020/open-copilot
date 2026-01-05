@@ -109,7 +109,7 @@ export interface ModelConfig {
 export interface SetChainOptions {
   prompt?: ChatPromptTemplate;
   chatModel?: BaseChatModel;
-  noteFile?: any;
+  noteFile?: TFile;
   abortController?: AbortController;
   refreshIndex?: boolean;
 }
@@ -121,7 +121,7 @@ export interface SetChainOptions {
 export interface CustomModel {
   id: string; // Unique identifier (auto-generated)
   name: string; // Model name (e.g., "gpt-4", "text-embedding-3-small")
-  type: 'chat' | 'embedding'; // Model type
+  type: "chat" | "embedding"; // Model type
   enabled: boolean; // Whether the model is enabled
   capabilities?: ModelCapability[]; // Optional model capabilities (vision, reasoning, etc.)
 }

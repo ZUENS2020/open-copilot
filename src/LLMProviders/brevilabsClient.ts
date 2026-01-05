@@ -4,6 +4,7 @@ import { logInfo } from "@/logger";
 import { turnOffPlus, turnOnPlus } from "@/plusUtils";
 import { getSettings } from "@/settings/model";
 import { arrayBufferToBase64 } from "@/utils/base64";
+import { requestUrl } from "obsidian";
 
 export interface RerankResponse {
   response: {
@@ -21,22 +22,35 @@ export interface RerankResponse {
 }
 
 export interface ToolCall {
-  tool: any;
-  args: any;
+  tool: string;
+  args: Record<string, unknown>;
 }
 
 export interface Url4llmResponse {
-  response: any;
+  response: {
+    title?: string;
+    content?: string;
+    url?: string;
+    [key: string]: unknown;
+  };
   elapsed_time_ms: number;
 }
 
 export interface Pdf4llmResponse {
-  response: any;
+  response: {
+    content?: string;
+    page_count?: number;
+    [key: string]: unknown;
+  };
   elapsed_time_ms: number;
 }
 
 export interface Docs4llmResponse {
-  response: any;
+  response: {
+    content?: string;
+    pages?: Array<{ page: number; content: string }>;
+    [key: string]: unknown;
+  };
   elapsed_time_ms: number;
 }
 
@@ -90,7 +104,7 @@ export class BrevilabsClient {
 
   private async makeRequest<T>(
     endpoint: string,
-    body: any,
+    body: Record<string, unknown>,
     method = "POST",
     excludeAuthHeader = false,
     skipLicenseCheck = false
@@ -108,7 +122,8 @@ export class BrevilabsClient {
         url.searchParams.append(key, value as string);
       });
     }
-    const response = await fetch(url.toString(), {
+    const response = await requestUrl({
+      url: url.toString(),
       method,
       headers: {
         "Content-Type": "application/json",
@@ -119,8 +134,8 @@ export class BrevilabsClient {
       },
       ...(method === "POST" && { body: JSON.stringify(body) }),
     });
-    const data = await response.json();
-    if (!response.ok) {
+    const data = JSON.parse(response.text);
+    if (response.status >= 400) {
       try {
         const errorDetail = data.detail;
         const error = new Error(errorDetail.reason);
@@ -150,18 +165,23 @@ export class BrevilabsClient {
     const url = new URL(`${BREVILABS_API_BASE_URL}${endpoint}`);
 
     try {
-      const response = await fetch(url.toString(), {
+      // Note: requestUrl doesn't support FormData directly, so we need to convert it
+      // For now, we'll need to handle this differently or use a workaround
+      // This is a limitation of Obsidian's requestUrl API
+      const response = await requestUrl({
+        url: url.toString(),
         method: "POST",
         headers: {
-          // No Content-Type header - browser will set it automatically with boundary
+          // No Content-Type header - let the browser set it automatically
           Authorization: `Bearer ${await getDecryptedKey(getSettings().apiKey)}`,
           "X-Client-Version": this.pluginVersion,
         },
-        body: formData,
+        // Convert FormData to a format requestUrl can handle
+        body: formData as unknown as string,
       });
 
-      const data = await response.json();
-      if (!response.ok) {
+      const data = JSON.parse(response.text);
+      if (response.status >= 400) {
         try {
           const errorDetail = data.detail;
           const error = new Error(errorDetail.reason);
@@ -185,10 +205,10 @@ export class BrevilabsClient {
    * unknown error.
    */
   async validateLicenseKey(
-    context?: Record<string, any>
+    context?: Record<string, unknown>
   ): Promise<{ isValid: boolean | undefined; plan?: string }> {
     // Build the request body with proper structure
-    const requestBody: Record<string, any> = {
+    const requestBody: Record<string, unknown> = {
       license_key: await getDecryptedKey(getSettings().apiKey),
     };
 

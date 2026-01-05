@@ -162,7 +162,10 @@ export default class CopilotPlugin extends Plugin {
 
     this.customCommandRegister = new CustomCommandRegister(this, this.app.vault);
     this.app.workspace.onLayoutReady(() => {
-      this.customCommandRegister.initialize().then(migrateCommands).then(suggestDefaultCommands);
+      void this.customCommandRegister
+        .initialize()
+        .then(migrateCommands)
+        .then(suggestDefaultCommands);
     });
 
     // Initialize automatic selection handler

@@ -58,7 +58,7 @@ type AgentSource = {
   title: string;
   path: string;
   score: number;
-  explanation?: any;
+  explanation?: string | Record<string, unknown>;
 };
 
 interface AgentLoopDeps {

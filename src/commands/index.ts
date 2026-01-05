@@ -329,7 +329,7 @@ export function registerCommands(
       }
 
       // Map hits to chunks (getDocsByPath returns {document, score} format)
-      const chunks = hits.map((hit: any) => hit.document);
+      const chunks = hits.map((hit) => hit.document);
       const content = [
         `# Embedding Debug: ${activeFile.basename}`,
         "",
@@ -337,19 +337,19 @@ export function registerCommands(
         `**Chunks:** ${chunks.length}`,
         `**Embedding Model:** ${chunks[0]?.embeddingModel || "unknown"}`,
         "",
-        ...chunks.flatMap((chunk: any, index: number) => {
-          const embedding = chunk.embedding || [];
+        ...chunks.flatMap((chunk, index: number) => {
+          const embedding = (chunk.embedding || []) as number[];
           const preview = embedding
             .slice(0, 10)
-            .map((v: number) => v.toFixed(6))
+            .map((v) => v.toFixed(6))
             .join(", ");
           return [
             `## Chunk ${index + 1}`,
             `- **ID:** ${chunk.id}`,
-            `- **Content Preview:** "${(chunk.content || "").substring(0, 200)}..."`,
+            `- **Content Preview:** "${((chunk.content || "") as string).substring(0, 200)}..."`,
             `- **Vector Length:** ${embedding.length}`,
             `- **Vector Preview:** [${preview}${embedding.length > 10 ? ", ..." : ""}]`,
-            `- **Tags:** ${(chunk.tags || []).join(", ") || "none"}`,
+            `- **Tags:** ${((chunk.tags || []) as string[]).join(", ") || "none"}`,
             `- **Characters:** ${chunk.nchars || 0}`,
             "",
           ];

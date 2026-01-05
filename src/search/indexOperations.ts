@@ -168,7 +168,7 @@ export class IndexOperations {
 
           if (currentCheckpoint > previousCheckpoint) {
             await this.dbOps.saveDB();
-            console.log("Copilot index checkpoint save completed.");
+            logInfo("Copilot index checkpoint save completed.");
           }
         } catch (err) {
           this.handleError(err, {
@@ -363,7 +363,7 @@ export class IndexOperations {
     // Stop button
     const stopButton = buttonContainer.createEl("button");
     stopButton.textContent = "Stop";
-    stopButton.style.marginLeft = "8px";
+    stopButton.addClass("copilot-notice-stop-button");
     stopButton.addEventListener("click", (event) => {
       event.stopPropagation();
       event.preventDefault();
@@ -388,14 +388,14 @@ export class IndexOperations {
         const files = await this.getFilesToIndex();
         if (files.length === 0) {
           // If no files to index after filter change, cancel the indexing
-          console.log("No files to index after filter change, stopping indexing");
+          logInfo("No files to index after filter change, stopping indexing");
           this.cancelIndexing();
           new Notice("No files to index with current filters");
           return;
         }
         this.state.totalFilesToIndex = files.length;
-        console.log("Total files to index:", this.state.totalFilesToIndex);
-        console.log("Files to index:", files);
+        logInfo("Total files to index:", this.state.totalFilesToIndex);
+        logInfo("Files to index:", files);
         this.updateIndexingNoticeMessage();
       }
     }
@@ -571,7 +571,7 @@ export class IndexOperations {
       this.dbOps.markUnsavedChanges();
 
       if (getSettings().debug) {
-        console.log(`Reindexed file: ${file.path}`);
+        logInfo(`Reindexed file: ${file.path}`);
       }
     } catch (error) {
       this.handleError(error, { filePath: file.path });
@@ -579,7 +579,7 @@ export class IndexOperations {
   }
 
   public async cancelIndexing(): Promise<void> {
-    console.log("Indexing cancelled by user");
+    logInfo("Indexing cancelled by user");
     this.state.isIndexingCancelled = true;
 
     // Add a small delay to ensure all state updates are processed

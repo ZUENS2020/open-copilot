@@ -1,6 +1,7 @@
 import { getBacklinkedNotes, getLinkedNotes } from "@/noteUtils";
 import { DBOperations } from "@/search/dbOperations";
 import { getSettings } from "@/settings/model";
+import { logInfo } from "@/logger";
 import { InternalTypedDocument, Orama, Result } from "@orama/orama";
 import { TFile } from "obsidian";
 
@@ -19,7 +20,7 @@ async function getNoteEmbeddings(notePath: string, db: Orama<any>): Promise<numb
   const hits = await DBOperations.getDocsByPath(db, notePath);
   if (!hits) {
     if (debug) {
-      console.log("No hits found for note:", notePath);
+      logInfo("No hits found for note:", notePath);
     }
     return [];
   }
@@ -28,7 +29,7 @@ async function getNoteEmbeddings(notePath: string, db: Orama<any>): Promise<numb
   for (const hit of hits) {
     if (!hit?.document?.embedding) {
       if (debug) {
-        console.log("No embedding found for note:", notePath);
+        logInfo("No embedding found for note:", notePath);
       }
       continue;
     }
@@ -79,7 +80,7 @@ async function calculateSimilarityScore({
   const currentNoteEmbeddings = await getNoteEmbeddings(filePath, db);
   if (currentNoteEmbeddings.length === 0) {
     if (debug) {
-      console.log("No embeddings found for note:", filePath);
+      logInfo("No embeddings found for note:", filePath);
     }
     return new Map();
   }
