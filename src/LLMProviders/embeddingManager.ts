@@ -80,9 +80,7 @@ export default class EmbeddingManager {
     } else if ("modelName" in emb && emb.modelName) {
       return emb.modelName;
     } else {
-      throw new Error(
-        `Embeddings instance missing model or modelName properties: ${embeddingsInstance}`
-      );
+      throw new Error("Embeddings instance missing model or modelName properties");
     }
   }
 

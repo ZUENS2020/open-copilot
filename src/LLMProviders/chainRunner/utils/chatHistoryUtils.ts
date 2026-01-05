@@ -104,7 +104,7 @@ export function processedMessagesToTextOnly(
         .join(" ");
       textContent = textParts || "[Image content]";
     } else {
-      textContent = String(msg.content || "");
+      textContent = "[Non-text content]";
     }
 
     return {
