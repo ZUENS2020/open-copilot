@@ -291,7 +291,7 @@ export class Docs4LLMParser implements FileParser {
     }
   }
 
-  private showRateLimitNotice(error: any): void {
+  private showRateLimitNotice(error: unknown): void {
     const now = Date.now();
 
     // Only show one rate limit notice per minute to avoid spam

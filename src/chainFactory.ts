@@ -37,8 +37,8 @@ export interface ConversationalRetrievalChainParams {
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export interface Document<T = Record<string, any>> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- LangChain Document interface uses any for metadata
+export interface Document<T = Record<string, unknown>> {
   // Structure of Document, possibly including pageContent, metadata, etc.
   pageContent: string;
   metadata: T;

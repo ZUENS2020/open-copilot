@@ -203,8 +203,8 @@ export function getSettings(): Readonly<CopilotSettings> {
 export function resetSettings(): void {
   const defaultSettingsWithBuiltIns = {
     ...DEFAULT_SETTINGS,
-    chatModels: DEFAULT_SETTINGS.chatModels.map((model: any) => ({ ...model, enabled: true })),
-    embeddingModels: DEFAULT_SETTINGS.embeddingModels.map((model: any) => ({
+    chatModels: DEFAULT_SETTINGS.chatModels.map((model: unknown) => ({ ...model, enabled: true })),
+    embeddingModels: DEFAULT_SETTINGS.embeddingModels.map((model: unknown) => ({
       ...model,
       enabled: true,
     })),
@@ -239,7 +239,7 @@ export function useSettingsValue(): Readonly<CopilotSettings> {
 /**
  * Migration function to convert old settings format to new format
  */
-function migrateSettings(settings: any): CopilotSettings {
+function migrateSettings(settings: unknown): CopilotSettings {
   const migrated: CopilotSettings = { ...settings };
 
   // Migrate API configuration
@@ -254,8 +254,8 @@ function migrateSettings(settings: any): CopilotSettings {
   // Migrate activeModels to chatModels
   if (settings.activeModels && !settings.chatModels) {
     migrated.chatModels = settings.activeModels
-      .filter((m: any) => !m.isEmbeddingModel)
-      .map((m: any) => ({
+      .filter((m: unknown) => !m.isEmbeddingModel)
+      .map((m: unknown) => ({
         id: m.id || `${m.name}|${m.provider}`,
         name: m.name,
         type: "chat" as const,
@@ -271,7 +271,7 @@ function migrateSettings(settings: any): CopilotSettings {
 
   // Migrate activeEmbeddingModels to embeddingModels
   if (settings.activeEmbeddingModels && !settings.embeddingModels) {
-    migrated.embeddingModels = settings.activeEmbeddingModels.map((m: any) => ({
+    migrated.embeddingModels = settings.activeEmbeddingModels.map((m: unknown) => ({
       id: m.id || `${m.name}|${m.provider}`,
       name: m.name,
       type: "embedding" as const,

@@ -14,7 +14,7 @@ export class ActionBlockStreamer {
 
   constructor(
     private toolManager: typeof ToolManager,
-    private writeToFileTool: any
+    private writeToFileTool: unknown
   ) {}
 
   private findCompleteBlock(str: string) {
@@ -32,7 +32,7 @@ export class ActionBlockStreamer {
     };
   }
 
-  async *processChunk(chunk: any): AsyncGenerator<any, void, unknown> {
+  async *processChunk(chunk: unknown): AsyncGenerator<any, void, unknown> {
     // Handle different chunk formats
     let chunkContent = "";
 
@@ -79,7 +79,7 @@ export class ActionBlockStreamer {
         // Format tool result using ToolResultFormatter for consistency with agent mode
         const formattedResult = ToolResultFormatter.format("writeToFile", result);
         yield { ...chunk, content: `\n${formattedResult}\n` };
-      } catch (err: any) {
+      } catch (err: unknown) {
         yield { ...chunk, content: `\nError: ${err?.message || err}\n` };
       }
 

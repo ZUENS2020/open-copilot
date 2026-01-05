@@ -21,7 +21,7 @@ export interface ToolExecutionResult {
  */
 export async function executeSequentialToolCall(
   toolCall: ToolCall,
-  availableTools: any[],
+  availableTools: unknown[],
   originalUserMessage?: string
 ): Promise<ToolExecutionResult> {
   const DEFAULT_TOOL_TIMEOUT = 60000; // 60 seconds timeout per tool
@@ -177,7 +177,7 @@ export function getToolEmoji(toolName: string): string {
 /**
  * Get user confirmation message for tool call
  */
-export function getToolConfirmtionMessage(toolName: string, toolArgs?: any): string | null {
+export function getToolConfirmtionMessage(toolName: string, toolArgs?: unknown): string | null {
   if (toolName == "writeToFile" || toolName == "replaceInFile") {
     return "Accept / reject in the Preview";
   }
@@ -247,11 +247,11 @@ export function logToolResult(toolName: string, result: ToolExecutionResult): vo
  * If path is not available, falls back to title
  */
 export function deduplicateSources(
-  sources: { title: string; path: string; score: number; explanation?: any }[]
-): { title: string; path: string; score: number; explanation?: any }[] {
+  sources: { title: string; path: string; score: number; explanation?: unknown }[]
+): { title: string; path: string; score: number; explanation?: unknown }[] {
   const uniqueSources = new Map<
     string,
-    { title: string; path: string; score: number; explanation?: any }
+    { title: string; path: string; score: number; explanation?: unknown }
   >();
 
   for (const source of sources) {

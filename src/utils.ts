@@ -195,12 +195,12 @@ export const stringToChainType = (chain: string): ChainType => {
 // TODO: These chain validation functions are deprecated
 // Remove after confirming chainManager no longer uses them
 export const isLLMChain = (chain: RunnableSequence): chain is RunnableSequence => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Accessing LangChain internal chain properties
   return (chain as any).last?.modelName || (chain as any).last?.model;
 };
 
 export const isRetrievalQAChain = (chain: BaseChain): chain is RetrievalQAChain => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Accessing LangChain internal chain properties
   return (chain as any).last?.retriever !== undefined;
 };
 
@@ -554,7 +554,7 @@ export function isNoteTitleUnique(title: string, vault: Vault): boolean {
 
 // Helper function to determine if we should show the full path for a file
 export function shouldShowPath(file: TFile): boolean {
-  return (file as any).needsPathDisplay === true;
+  return (file as { needsPathDisplay?: boolean }).needsPathDisplay === true;
 }
 
 /**
@@ -797,7 +797,7 @@ function createReadableStreamFromString(input: string) {
 
 // err2String is now exported from '@/errorFormat' to avoid circular dependencies and duplication.
 
-export function omit<T extends Record<string, any>, K extends keyof T>(
+export function omit<T extends Record<string, unknown>, K extends keyof T>(
   obj: T,
   keys: K[]
 ): Omit<T, K> {
@@ -915,7 +915,7 @@ export async function insertIntoEditor(message: string, replace: boolean = false
   new Notice("Message inserted into the active note.");
 }
 
-export function debounce<T extends (...args: any[]) => void>(
+export function debounce<T extends (...args: unknown[]) => void>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {
@@ -970,7 +970,10 @@ export function isOSeriesModel(model: BaseChatModel | string): boolean {
   }
 
   // For BaseChatModel instances
-  const modelName = (model as any).modelName || (model as any).model || "";
+  const modelName =
+    (model as { modelName?: string; model?: string }).modelName ||
+    (model as { modelName?: string; model?: string }).model ||
+    "";
   return modelName.startsWith("o1") || modelName.startsWith("o3") || modelName.startsWith("o4");
 }
 
@@ -980,7 +983,10 @@ export function isGPT5Model(model: BaseChatModel | string): boolean {
   }
 
   // For BaseChatModel instances
-  const modelName = (model as any).modelName || (model as any).model || "";
+  const modelName =
+    (model as { modelName?: string; model?: string }).modelName ||
+    (model as { modelName?: string; model?: string }).model ||
+    "";
   return modelName.startsWith("gpt-5");
 }
 
@@ -996,7 +1002,11 @@ export interface ModelInfo {
 
 export function getModelInfo(model: BaseChatModel | string): ModelInfo {
   const modelName =
-    typeof model === "string" ? model : (model as any).modelName || (model as any).model || "";
+    typeof model === "string"
+      ? model
+      : (model as { modelName?: string; model?: string }).modelName ||
+        (model as { modelName?: string; model?: string }).model ||
+        "";
 
   const isOSeries = isOSeriesModel(modelName);
   const isGPT5 = isGPT5Model(modelName);
@@ -1216,7 +1226,7 @@ export async function openFileInWorkspace(file: TFile, focusIfOpen: boolean = tr
       leaf.view.getViewType() === "pdf" ||
       leaf.view.getViewType() === "canvas"
     ) {
-      const viewFile = (leaf.view as any).file;
+      const viewFile = (leaf.view as { file?: TFile }).file;
       if (viewFile && viewFile.path === file.path) {
         existingLeaf = leaf;
       }

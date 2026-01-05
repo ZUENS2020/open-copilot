@@ -25,7 +25,7 @@ const getPropertyPrefix = (property: ColorProperty): string => {
 
 // Utility Generator
 const generateUtility =
-  (e: any) => (property: ColorProperty, name: string, color: string, opacity: number) => {
+  (e: unknown) => (property: ColorProperty, name: string, color: string, opacity: number) => {
     const prefix = getPropertyPrefix(property);
     const className = `${prefix}-${name}/${opacity}`;
 
@@ -37,7 +37,7 @@ const generateUtility =
   };
 
 // Color Processing
-const generateAllUtilities = (e: any) => (color: string, name: string, opacity: number) => {
+const generateAllUtilities = (e: unknown) => (color: string, name: string, opacity: number) => {
   const properties: ColorProperty[] = ["background-color", "border-color", "color"];
   const utilities = properties.map((property) =>
     generateUtility(e)(property, name, color, opacity)
@@ -47,14 +47,14 @@ const generateAllUtilities = (e: any) => (color: string, name: string, opacity: 
 };
 
 const generateOpacityClasses =
-  (e: any, opacityUtilities: Record<string, any>) => (color: string, name: string) => {
+  (e: unknown, opacityUtilities: Record<string, unknown>) => (color: string, name: string) => {
     Array.from({ length: 10 }, (_, i) => (i + 1) * 10).forEach((opacity) => {
       Object.assign(opacityUtilities, generateAllUtilities(e)(color, name, opacity));
     });
   };
 
 const processColorObject =
-  (e: any, opacityUtilities: Record<string, any>) =>
+  (e: unknown, opacityUtilities: Record<string, unknown>) =>
   (colorValue: string | ColorValue, baseName: string, parentPath: string[] = []) => {
     const currentPath = [...parentPath, baseName];
 
@@ -87,7 +87,7 @@ const processColorObject =
  * text-background-modifier-success/30
  */
 export const colorOpacityPlugin = plugin(function ({ addUtilities, theme, e }) {
-  const opacityUtilities: Record<string, any> = {};
+  const opacityUtilities: Record<string, unknown> = {};
 
   // 处理所有颜色相关的主题配置
   const processThemeColors = (themeKey: string, prefix?: string) => {

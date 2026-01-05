@@ -319,7 +319,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
   };
 
   // Unified handler for adding to context (from popover @ mention)
-  const handleAddToContext = (category: string, data: any) => {
+  const handleAddToContext = (category: string, data: unknown) => {
     switch (category) {
       case "activeNote":
         // Set active note context flag (no pill needed - context badge shows it)
@@ -374,7 +374,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
   };
 
   // Unified handler for removing from context (from context menu badges)
-  const handleRemoveFromContext = (category: string, data: any) => {
+  const handleRemoveFromContext = (category: string, data: unknown) => {
     switch (category) {
       case "activeNote":
         // Remove active note pill from editor and turn off flag
@@ -524,7 +524,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
     };
   }, [app.workspace]);
 
-  const onEditorReady = useCallback((editor: any) => {
+  const onEditorReady = useCallback((editor: unknown) => {
     lexicalEditorRef.current = editor;
   }, []);
 

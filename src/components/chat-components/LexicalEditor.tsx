@@ -50,7 +50,7 @@ interface LexicalEditorProps {
   onFoldersRemoved?: (removedFolders: string[]) => void;
   onActiveNoteAdded?: () => void;
   onActiveNoteRemoved?: () => void;
-  onEditorReady?: (editor: any) => void;
+  onEditorReady?: (editor: LexicalEditorType) => void;
   onImagePaste?: (files: File[]) => void;
   onTagSelected?: () => void;
   isCopilotPlus?: boolean;

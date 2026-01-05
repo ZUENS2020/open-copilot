@@ -19,7 +19,7 @@ export interface IPillNode {
 /**
  * Check if a node is a pill-like node (any DecoratorNode that implements IPillNode)
  */
-function $isPillNode(node: any): node is DecoratorNode<any> & IPillNode {
+function $isPillNode(node: unknown): node is DecoratorNode<any> & IPillNode {
   // Check if it's a DecoratorNode (all pills extend DecoratorNode)
   if (!(node instanceof DecoratorNode)) {
     return false;

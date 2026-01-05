@@ -174,7 +174,7 @@ export class HybridRetriever extends BaseRetriever {
       const hits = await DBOperations.getDocsByPath(db, noteFile.path);
       if (hits) {
         const matchingChunks = hits.map(
-          (hit: any) =>
+          (hit: unknown) =>
             new Document({
               pageContent: hit.document.content,
               metadata: {
@@ -221,7 +221,7 @@ export class HybridRetriever extends BaseRetriever {
 
     const db = await VectorStoreManager.getInstance().getDb();
 
-    const searchParams: any = {
+    const searchParams: unknown = {
       similarity: this.options.minSimilarityScore,
       limit: this.options.maxK,
       includeVectors: true,

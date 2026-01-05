@@ -37,7 +37,7 @@ export class LLMChainRunner extends BaseChainRunner {
     });
 
     // Insert L4 (chat history) between system and user
-    const messages: any[] = [];
+    const messages: unknown[] = [];
 
     // Add system message (L1)
     const systemMessage = baseMessages.find((m) => m.role === "system");
@@ -56,7 +56,7 @@ export class LLMChainRunner extends BaseChainRunner {
       // Handle multimodal content if present
       if (userMessage.content && Array.isArray(userMessage.content)) {
         // Merge envelope text with multimodal content (images)
-        const updatedContent = userMessage.content.map((item: any) => {
+        const updatedContent = userMessage.content.map((item: unknown) => {
           if (item.type === "text") {
             return { ...item, text: userMessageContent.content };
           }
@@ -133,7 +133,7 @@ export class LLMChainRunner extends BaseChainRunner {
         }
         streamer.processChunk(chunk);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Check if the error is due to abort signal
       if (error.name === "AbortError" || abortController.signal.aborted) {
         logInfo("Stream aborted by user", { reason: abortController.signal.reason });

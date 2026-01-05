@@ -183,7 +183,7 @@ async function resolveNoteFile(notePath: string): Promise<ResolveNoteOutcome> {
   if (basename) {
     const normalizedBasename = basename.toLowerCase();
     const basenameMatches = markdownFiles.filter(
-      (file) => file.basename.toLowerCase() === normalizedBasename
+      (file: TFile) => file.basename.toLowerCase() === normalizedBasename
     );
 
     if (basenameMatches.length === 1) {
@@ -200,7 +200,7 @@ async function resolveNoteFile(notePath: string): Promise<ResolveNoteOutcome> {
     return { type: "not_found" };
   }
 
-  const partialMatches = markdownFiles.filter((file) =>
+  const partialMatches = markdownFiles.filter((file: TFile) =>
     pathSegmentsMatchTail(file.path, targetSegments)
   );
 

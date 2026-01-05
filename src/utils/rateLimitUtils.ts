@@ -11,7 +11,7 @@
  * @param error The error object to check
  * @returns true if the error is identified as a rate limit error
  */
-export function isRateLimitError(error: any): boolean {
+export function isRateLimitError(error: unknown): boolean {
   if (!error || typeof error !== "object") return false;
 
   const errorMessage = error.message || error.toString();
@@ -28,7 +28,7 @@ export function isRateLimitError(error: any): boolean {
  * @param error The rate limit error object
  * @returns The retry time string if found, or 'some time' as fallback
  */
-export function extractRetryTime(error: any): string {
+export function extractRetryTime(error: unknown): string {
   const errorMessage = error?.message || error?.toString() || "";
   const retryMatch = errorMessage.match(/Try again in ([\d\w\s]+)/);
   return retryMatch ? retryMatch[1] : "some time";

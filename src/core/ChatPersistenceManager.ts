@@ -172,13 +172,13 @@ export class ChatPersistenceManager {
     }
 
     const files = this.app.vault.getMarkdownFiles();
-    const folderFiles = files.filter((file) => file.path.startsWith(folder.path));
+    const folderFiles = files.filter((file: TFile) => file.path.startsWith(folder.path));
 
     // Get current project ID if in a project
     const currentProject = getCurrentProject();
 
     // Filter files based on project context
-    return folderFiles.filter((file) => {
+    return folderFiles.filter((file: TFile) => {
       if (currentProject) {
         // In project mode, only show files for this project
         return file.basename.startsWith(`${currentProject.id}__`);
@@ -258,7 +258,14 @@ export class ChatPersistenceManager {
       const contentLines = fullContent.split("\n");
       let messageText = fullContent;
       let timestamp = "Unknown time";
-      let contextInfo: any = undefined;
+      let contextInfo:
+        | {
+            notes?: TFile[];
+            urls?: string[];
+            tags?: string[];
+            folders?: string[];
+          }
+        | undefined = undefined;
 
       // Check for context and timestamp lines
       let endIndex = contentLines.length;
@@ -315,8 +322,20 @@ export class ChatPersistenceManager {
   /**
    * Parse context string back into context object
    */
-  private parseContextString(contextStr: string): any {
-    const context: any = {
+  private parseContextString(contextStr: string):
+    | {
+        notes: TFile[];
+        urls: string[];
+        tags: string[];
+        folders: string[];
+      }
+    | undefined {
+    const context: {
+      notes: TFile[];
+      urls: string[];
+      tags: string[];
+      folders: string[];
+    } = {
       notes: [],
       urls: [],
       tags: [],
@@ -351,7 +370,7 @@ export class ChatPersistenceManager {
 
               const matches = this.app.vault
                 .getMarkdownFiles()
-                .filter((f) => f.basename === basename);
+                .filter((f: TFile) => f.basename === basename);
 
               if (matches.length === 1) {
                 logInfo(
@@ -360,7 +379,7 @@ export class ChatPersistenceManager {
                 return matches[0];
               } else if (matches.length > 1) {
                 logWarn(
-                  `[ChatPersistenceManager] Ambiguous basename "${basename}", skipping. Matches: ${matches.map((f) => f.path).join(", ")}`
+                  `[ChatPersistenceManager] Ambiguous basename "${basename}", skipping. Matches: ${matches.map((f: TFile) => f.path).join(", ")}`
                 );
               } else {
                 logWarn(`[ChatPersistenceManager] Note not found: ${trimmedPath}`);
@@ -639,12 +658,15 @@ ${chatContent}`;
 
       const sanitizedTopic = topic.trim();
 
-      await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
-        if (frontmatter.topic === sanitizedTopic) {
-          return;
+      await this.app.fileManager.processFrontMatter(
+        file,
+        (frontmatter: Record<string, unknown>) => {
+          if (frontmatter.topic === sanitizedTopic) {
+            return;
+          }
+          frontmatter.topic = sanitizedTopic;
         }
-        frontmatter.topic = sanitizedTopic;
-      });
+      );
 
       logInfo(`[ChatPersistenceManager] Applied AI topic to chat file: ${file.path}`);
     } catch (error) {

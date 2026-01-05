@@ -115,7 +115,7 @@ export abstract class BaseChainRunner implements ChainRunner {
       const { parseToolCallMarkers } = await import("./utils/toolCallParser");
       const parsed = parseToolCallMarkers(fullAIResponse);
       let textOnly = parsed.segments
-        .map((seg: any) => (seg.type === "text" ? seg.content : ""))
+        .map((seg: unknown) => (seg.type === "text" ? seg.content : ""))
         .join("")
         .trim();
       if (!textOnly) textOnly = fullAIResponse || "";
@@ -140,7 +140,7 @@ export abstract class BaseChainRunner implements ChainRunner {
    * @param error - Raw provider error object.
    * @param processErrorChunk - Callback used to stream error text to the UI.
    */
-  protected async handleError(error: any, processErrorChunk: (message: string) => void) {
+  protected async handleError(error: unknown, processErrorChunk: (message: string) => void) {
     const msg = err2String(error);
     logError("Error during LLM invocation:", msg);
     const errorData = error?.response?.data?.error || msg;
@@ -194,7 +194,7 @@ export abstract class BaseChainRunner implements ChainRunner {
    * @returns True if the error indicates an authentication problem.
    */
   private isAuthenticationError(error: unknown, normalizedMessage: string): boolean {
-    const responseError = (error as { response?: { status?: number; data?: any } })?.response;
+    const responseError = (error as { response?: { status?: number; data?: unknown } })?.response;
     const errorData = responseError?.data?.error ?? (error as { error?: unknown })?.error;
     const rawStatus = responseError?.status ?? (errorData as { status?: number | string })?.status;
     const statusCode =

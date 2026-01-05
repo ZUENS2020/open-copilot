@@ -12,7 +12,7 @@ const youtubeTranscriptionTool = createTool({
   schema: z.object({}), // Empty schema - the tool will receive _userMessageContent internally
   isPlusOnly: true,
   requiresUserMessageContent: true,
-  handler: async (args: any) => {
+  handler: async (args: Record<string, unknown>) => {
     // The _userMessageContent is injected by the tool execution system
     const { _userMessageContent } = args;
 

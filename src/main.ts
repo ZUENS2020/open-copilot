@@ -120,17 +120,20 @@ export default class CopilotPlugin extends Plugin {
 
     registerCommands(this, undefined, getSettings());
 
-    this.registerMarkdownCodeBlockProcessor(QUICK_COMMAND_CODE_BLOCK, (_, el) => {
-      createQuickCommandContainer({
-        plugin: this,
-        element: el,
-      });
+    this.registerMarkdownCodeBlockProcessor(
+      QUICK_COMMAND_CODE_BLOCK,
+      (_: string, el: HTMLElement) => {
+        createQuickCommandContainer({
+          plugin: this,
+          element: el,
+        });
 
-      // Remove parent element class names to clear default code block styling
-      if (el.parentElement) {
-        el.parentElement.className = "";
+        // Remove parent element class names to clear default code block styling
+        if (el.parentElement) {
+          el.parentElement.className = "";
+        }
       }
-    });
+    );
 
     // Tool initialization is now handled automatically in CopilotPlusChainRunner and AutonomousAgentChainRunner
 
@@ -141,7 +144,7 @@ export default class CopilotPlugin extends Plugin {
     );
 
     this.registerEvent(
-      this.app.workspace.on("active-leaf-change", (leaf) => {
+      this.app.workspace.on("active-leaf-change", (leaf: WorkspaceLeaf) => {
         if (leaf && leaf.view instanceof MarkdownView) {
           const file = leaf.view.file;
           if (file) {
@@ -149,7 +152,7 @@ export default class CopilotPlugin extends Plugin {
             // Semantic search indexes are rebuilt manually or on startup as needed
             const activeCopilotView = this.app.workspace
               .getLeavesOfType(CHAT_VIEWTYPE)
-              .find((leaf) => leaf.view instanceof CopilotView)?.view as CopilotView;
+              .find((leaf: WorkspaceLeaf) => leaf.view instanceof CopilotView)?.view as CopilotView;
 
             if (activeCopilotView) {
               const event = new CustomEvent(EVENT_NAMES.ACTIVE_LEAF_CHANGE);
@@ -165,7 +168,10 @@ export default class CopilotPlugin extends Plugin {
       void this.customCommandRegister
         .initialize()
         .then(migrateCommands)
-        .then(suggestDefaultCommands);
+        .then(suggestDefaultCommands)
+        .catch((err) => {
+          console.error("Failed to initialize custom commands:", err);
+        });
     });
 
     // Initialize automatic selection handler
@@ -224,7 +230,7 @@ export default class CopilotPlugin extends Plugin {
     setTimeout(() => {
       const activeCopilotView = this.app.workspace
         .getLeavesOfType(CHAT_VIEWTYPE)
-        .find((leaf) => leaf.view instanceof CopilotView)?.view as CopilotView;
+        .find((leaf: WorkspaceLeaf) => leaf.view instanceof CopilotView)?.view as CopilotView;
       if (activeCopilotView && (!checkSelectedText || selectedText)) {
         const event = new CustomEvent(eventType, { detail: { selectedText, eventSubtype } });
         activeCopilotView.eventTarget.dispatchEvent(event);
@@ -239,7 +245,7 @@ export default class CopilotPlugin extends Plugin {
   emitChatIsVisible() {
     const activeCopilotView = this.app.workspace
       .getLeavesOfType(CHAT_VIEWTYPE)
-      .find((leaf) => leaf.view instanceof CopilotView)?.view as CopilotView;
+      .find((leaf: WorkspaceLeaf) => leaf.view instanceof CopilotView)?.view as CopilotView;
 
     if (activeCopilotView) {
       const event = new CustomEvent(EVENT_NAMES.CHAT_IS_VISIBLE);
@@ -249,7 +255,7 @@ export default class CopilotPlugin extends Plugin {
 
   initActiveLeafChangeHandler() {
     this.registerEvent(
-      this.app.workspace.on("active-leaf-change", (leaf) => {
+      this.app.workspace.on("active-leaf-change", (leaf: WorkspaceLeaf) => {
         if (!leaf) {
           return;
         }
@@ -414,7 +420,7 @@ export default class CopilotPlugin extends Plugin {
     }, 50);
   }
 
-  async deactivateView() {
+  deactivateView() {
     this.app.workspace.detachLeavesOfType(CHAT_VIEWTYPE);
   }
 
@@ -465,7 +471,7 @@ export default class CopilotPlugin extends Plugin {
     }
 
     const files = this.app.vault.getMarkdownFiles();
-    const folderFiles = files.filter((file) => file.path.startsWith(folder.path));
+    const folderFiles = files.filter((file: TFile) => file.path.startsWith(folder.path));
 
     // Get current project ID if in a project
     const currentProject = getCurrentProject();
@@ -474,11 +480,11 @@ export default class CopilotPlugin extends Plugin {
     if (currentProjectId) {
       // In project mode: return only files with this project's ID prefix
       const projectPrefix = `${currentProjectId}__`;
-      return folderFiles.filter((file) => file.basename.startsWith(projectPrefix));
+      return folderFiles.filter((file: TFile) => file.basename.startsWith(projectPrefix));
     } else {
       // In non-project mode: return only files without any project ID prefix
       // This assumes project IDs always use the format projectId__ as prefix
-      return folderFiles.filter((file) => {
+      return folderFiles.filter((file: TFile) => {
         // Check if the filename has any projectId__ prefix pattern
         return !file.basename.match(/^[a-zA-Z0-9-]+__/);
       });
@@ -537,9 +543,12 @@ export default class CopilotPlugin extends Plugin {
   async updateChatTitle(fileId: string, newTitle: string): Promise<void> {
     const file = this.app.vault.getAbstractFileByPath(fileId);
     if (file instanceof TFile) {
-      await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
-        frontmatter.topic = newTitle;
-      });
+      await this.app.fileManager.processFrontMatter(
+        file,
+        (frontmatter: Record<string, unknown>) => {
+          frontmatter.topic = newTitle;
+        }
+      );
 
       // Wait for metadata cache to update with improved error handling
       // This ensures that subsequent calls to extractChatTitle will get the updated data

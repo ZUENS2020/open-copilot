@@ -72,7 +72,7 @@ export class UserMemoryManager {
     }
 
     // Fire and forget - run in background
-    this.updateMemory(messages, chatModel).catch((error) => {
+    void this.updateMemory(messages, chatModel).catch((error) => {
       logError("[UserMemoryManager] Background user memory operation failed:", error);
     });
   }

@@ -294,7 +294,7 @@ ${params}
       context.iterationHistory = loopResult.iterationHistory;
       context.collectedSources = loopResult.collectedSources;
       this.llmFormattedMessages = loopResult.llmMessages;
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.name === "AbortError" || abortController.signal.aborted) {
         logInfo("Autonomous agent stream aborted by user", {
           reason: abortController.signal.reason,
@@ -368,7 +368,7 @@ ${params}
    */
   private async prepareAgentConversation(
     userMessage: ChatMessage,
-    chatModel: any
+    chatModel: unknown
   ): Promise<AgentRunContext> {
     const conversationMessages: ConversationMessage[] = [];
     const iterationHistory: string[] = [];

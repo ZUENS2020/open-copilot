@@ -77,7 +77,7 @@ export interface ModelAdapter {
    * @param response - The model's response text containing tool calls
    * @returns Array of parsed tool calls
    */
-  parseToolCalls?(response: string): any[];
+  parseToolCalls?(response: string): unknown[];
 
   /**
    * Check if model needs special handling
@@ -663,7 +663,7 @@ REMEMBER: One brief sentence before tools is perfect. Nothing after tool calls.`
         .replace(/<think>[\s\S]*?<\/think>/g, "")
         .trim();
 
-      // Simple threshold: any substantial non-thinking content after tools is premature
+      // Simple threshold: unknown substantial non-thinking content after tools is premature
       const SUBSTANTIAL_CONTENT_THRESHOLD = 100; // characters
 
       if (contentAfterWithoutThinking.length > SUBSTANTIAL_CONTENT_THRESHOLD) {

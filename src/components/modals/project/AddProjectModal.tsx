@@ -89,7 +89,7 @@ function AddProjectModalContent({ initialProject, onSave, onCancel }: AddProject
 
   const handleInputChange = (
     field: string,
-    value: string | number | string[] | Record<string, any>
+    value: string | number | string[] | Record<string, unknown>
   ) => {
     setFormData((prev) => {
       // Handle text input

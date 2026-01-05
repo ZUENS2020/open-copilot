@@ -47,9 +47,8 @@ export async function getAllQAMarkdownContent(app: App): Promise<string> {
     return shouldIndexFile(file, inclusions, exclusions);
   });
 
-  await Promise.all(filteredFiles.map((file) => app.vault.cachedRead(file))).then((contents) =>
-    contents.map((c) => (allContent += c + " "))
-  );
+  const contents = await Promise.all(filteredFiles.map((file) => app.vault.cachedRead(file)));
+  contents.map((c) => (allContent += c + " "));
 
   return allContent;
 }

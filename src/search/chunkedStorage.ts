@@ -11,7 +11,7 @@ const LEGACY_INDEX_SUFFIX = ".json";
 export interface ChunkMetadata {
   numPartitions: number;
   vectorLength: number;
-  schema: any;
+  schema: unknown;
   lastModified: number;
   documentPartitions: Record<string, number>;
 }
@@ -54,7 +54,7 @@ export class ChunkedStorage {
   }
 
   private distributeDocumentsToPartitions(
-    documents: any[],
+    documents: unknown[],
     numPartitions: number
   ): Map<number, any[]> {
     const partitions = new Map<number, any[]>();
@@ -158,7 +158,10 @@ export class ChunkedStorage {
         schema: db.schema,
         lastModified: Date.now(),
         documentPartitions: Object.fromEntries(
-          rawDocs.map((doc: any) => [doc.id, this.assignDocumentToPartition(doc.id, numPartitions)])
+          rawDocs.map((doc: unknown) => [
+            doc.id,
+            this.assignDocumentToPartition(doc.id, numPartitions),
+          ])
         ),
       };
 
@@ -283,14 +286,14 @@ export class ChunkedStorage {
       }
 
       // Create new docs object based on internalDocumentIDStore order
-      const orderedDocs: Record<string, any> = {};
+      const orderedDocs: Record<string, unknown> = {};
       let nextDocId = 1;
 
       for (const internalId of mergedData.internalDocumentIDStore.internalIdToId) {
         // Find document in any chunk
         const doc = allChunks
           .flatMap((chunk) => Object.values(chunk.docs.docs))
-          .find((doc: any) => (doc as any).id === internalId);
+          .find((doc: unknown) => (doc as any).id === internalId);
 
         if (doc) {
           orderedDocs[nextDocId.toString()] = doc;

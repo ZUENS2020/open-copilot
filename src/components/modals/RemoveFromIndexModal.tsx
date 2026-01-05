@@ -23,31 +23,43 @@ export class RemoveFromIndexModal extends Modal {
         "Paste the markdown list of file paths to remove from the index. You can get the list by running the command `List all indexed files`."
       )
       .setClass("remove-files-setting")
-      .addTextArea((text) =>
-        text
-          .setPlaceholder("- [[path/to/file1.md]]\n- [[path/to/file2.md]]")
-          .setValue(this.filePaths)
-          .onChange((value) => {
-            this.filePaths = value;
-          })
+      .addTextArea(
+        (text: {
+          setPlaceholder: (value: string) => {
+            setValue: (value: string) => {
+              onChange: (callback: (value: string) => void) => unknown;
+            };
+          };
+        }) =>
+          text
+            .setPlaceholder("- [[path/to/file1.md]]\n- [[path/to/file2.md]]")
+            .setValue(this.filePaths)
+            .onChange((value: string) => {
+              this.filePaths = value;
+            })
       );
 
-    new Setting(container).addButton((btn) =>
-      btn
-        .setButtonText("Remove")
-        .setCta()
-        .onClick(() => {
-          const paths = this.filePaths
-            .split("\n")
-            .map((line) => {
-              // Extract path from markdown list format: "- [[path/to/file.md]]"
-              const match = line.match(/\[\[(.*?)\]\]/);
-              return match ? match[1].trim() : "";
-            })
-            .filter((p) => p.length > 0);
-          this.onSubmit(paths);
-          this.close();
-        })
+    new Setting(container).addButton(
+      (btn: {
+        setButtonText: (text: string) => {
+          setCta: () => { onClick: (callback: () => void) => unknown };
+        };
+      }) =>
+        btn
+          .setButtonText("Remove")
+          .setCta()
+          .onClick(() => {
+            const paths = this.filePaths
+              .split("\n")
+              .map((line: string) => {
+                // Extract path from markdown list format: "- [[path/to/file.md]]"
+                const match = line.match(/\[\[(.*?)\]\]/);
+                return match ? match[1].trim() : "";
+              })
+              .filter((p: string) => p.length > 0);
+            this.onSubmit(paths);
+            this.close();
+          })
     );
 
     // Add CSS for better layout

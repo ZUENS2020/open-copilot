@@ -12,7 +12,7 @@ import { useAtMentionSearch } from "./hooks/useAtMentionSearch";
 interface AtMentionTypeaheadProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelect: (category: AtMentionCategory, data: any) => void;
+  onSelect: (category: AtMentionCategory, data: unknown) => void;
   isCopilotPlus?: boolean;
   currentActiveFile?: TFile | null;
 }
@@ -56,7 +56,7 @@ export function AtMentionTypeahead({
 
   // Handle selection
   const handleSelect = useCallback(
-    (option: any) => {
+    (option: unknown) => {
       if (extendedState.mode === "category" && isCategoryOption(option) && !searchQuery) {
         // Category was selected - switch to search mode for that category
         setExtendedState((prev) => ({

@@ -35,7 +35,7 @@ export function ActiveNotePillSyncPlugin({
 
         // Recursively traverse the editor tree to find active note pill
         let foundActiveNotePill = false;
-        function traverse(node: any): void {
+        function traverse(node: unknown): void {
           if ($isActiveNotePillNode(node)) {
             foundActiveNotePill = true;
             return;

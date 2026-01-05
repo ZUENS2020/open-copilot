@@ -314,7 +314,7 @@ export class ProjectContextCache {
       if (await this.vault.adapter.exists(this.cacheDir)) {
         const files = await this.vault.adapter.list(this.cacheDir);
         logInfo("Clearing project context cache, removing files:", files.files.length);
-        await Promise.all(files.files.map((file) => this.vault.adapter.remove(file)));
+        await Promise.all(files.files.map((file: string) => this.vault.adapter.remove(file)));
       }
 
       // Only remove the file cache entries that were referenced by projects

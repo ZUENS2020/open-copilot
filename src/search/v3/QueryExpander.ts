@@ -137,7 +137,7 @@ Format your response using XML tags:
         this.config.timeout,
         "Query expansion"
       );
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof TimeoutError) {
         logInfo(`QueryExpander: Timeout reached for "${query}"`);
         return this.fallbackExpansion(query);
@@ -203,7 +203,7 @@ Format your response using XML tags:
    * @param response - The LLM response object or string
    * @returns The extracted text content or null if empty
    */
-  private extractContent(response: any): string | null {
+  private extractContent(response: unknown): string | null {
     // Elegant extraction with nullish coalescing
     return typeof response === "string"
       ? response

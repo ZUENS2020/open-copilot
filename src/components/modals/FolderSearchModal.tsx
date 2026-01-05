@@ -1,4 +1,4 @@
-import { App, FuzzySuggestModal } from "obsidian";
+import { App, FuzzySuggestModal, TAbstractFile } from "obsidian";
 import { extractAppIgnoreSettings } from "@/search/searchUtils";
 
 export class FolderSearchModal extends FuzzySuggestModal<string> {
@@ -14,7 +14,7 @@ export class FolderSearchModal extends FuzzySuggestModal<string> {
     const ignoredFolders = extractAppIgnoreSettings(this.app);
 
     // Get all files in vault
-    this.app.vault.getAllLoadedFiles().forEach((file) => {
+    this.app.vault.getAllLoadedFiles().forEach((file: TAbstractFile) => {
       if (file.parent?.path && file.parent.path !== "/") {
         // Check if the folder or any of its parent folders are ignored
         const shouldInclude = !ignoredFolders.some(

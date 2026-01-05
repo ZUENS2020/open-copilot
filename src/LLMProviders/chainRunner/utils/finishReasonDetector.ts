@@ -28,7 +28,7 @@ export interface FinishReasonResult {
  * @param chunk The streaming chunk from the LLM (AIMessageChunk)
  * @returns FinishReasonResult with truncation status and details
  */
-export function detectTruncation(chunk: any): FinishReasonResult {
+export function detectTruncation(chunk: unknown): FinishReasonResult {
   const metadata = chunk.response_metadata || {};
 
   // OpenAI, DeepSeek, Mistral, Groq use "length"
@@ -69,7 +69,7 @@ export function detectTruncation(chunk: any): FinishReasonResult {
  * @param chunk The streaming chunk from the LLM
  * @returns Token usage object or null if not available
  */
-export function extractTokenUsage(chunk: any): {
+export function extractTokenUsage(chunk: unknown): {
   inputTokens?: number;
   outputTokens?: number;
   totalTokens?: number;

@@ -1,5 +1,6 @@
 import { AlertCircle, CheckCircle, CircleDashed, Loader2, X } from "lucide-react";
 import { TFile } from "obsidian";
+import type { LexicalEditor } from "lexical";
 import React, { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,10 +26,10 @@ interface ChatContextMenuProps {
   contextUrls: string[];
   contextFolders: string[];
   selectedTextContexts?: SelectedTextContext[];
-  onRemoveContext: (category: string, data: any) => void;
+  onRemoveContext: (category: string, data: unknown) => void;
   showProgressCard: () => void;
-  onTypeaheadSelect: (category: string, data: any) => void;
-  lexicalEditorRef?: React.RefObject<any>;
+  onTypeaheadSelect: (category: string, data: unknown) => void;
+  lexicalEditorRef?: React.RefObject<LexicalEditor>;
 }
 
 function ContextSelection({
@@ -36,7 +37,7 @@ function ContextSelection({
   onRemoveContext,
 }: {
   selectedText: SelectedTextContext;
-  onRemoveContext: (category: string, data: any) => void;
+  onRemoveContext: (category: string, data: unknown) => void;
 }) {
   const lineRange =
     selectedText.startLine === selectedText.endLine
@@ -85,7 +86,7 @@ export const ChatContextMenu: React.FC<ChatContextMenuProps> = ({
   };
 
   // Simple wrapper that adds focus management to the ContextControl handler
-  const handleTypeaheadSelect = (category: string, data: any) => {
+  const handleTypeaheadSelect = (category: string, data: unknown) => {
     // Delegate to ContextControl handler
     onTypeaheadSelect(category, data);
 

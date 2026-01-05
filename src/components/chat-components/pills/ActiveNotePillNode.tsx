@@ -163,7 +163,7 @@ export function $removeActiveNotePills(): number {
   const root = $getRoot();
   let removedCount = 0;
 
-  function traverse(node: any): void {
+  function traverse(node: unknown): void {
     if ($isActiveNotePillNode(node)) {
       node.remove();
       removedCount++;

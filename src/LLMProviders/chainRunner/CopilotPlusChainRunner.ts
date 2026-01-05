@@ -239,7 +239,7 @@ OUTPUT ONLY XML - NO OTHER TEXT.`;
   private async processAtCommands(
     userMessage: string,
     existingToolCalls: ToolCallWithExecutor[],
-    context: { salientTerms: string[]; timeRange?: any }
+    context: { salientTerms: string[]; timeRange?: unknown }
   ): Promise<ToolCallWithExecutor[]> {
     const message = userMessage.toLowerCase();
     const cleanQuery = this.removeAtCommands(userMessage);
@@ -498,7 +498,10 @@ OUTPUT ONLY XML - NO OTHER TEXT.`;
   }
 
   protected hasCapability(model: BaseChatModel, capability: ModelCapability): boolean {
-    const modelName = (model as any).modelName || (model as any).model || "";
+    const modelName =
+      (model as { modelName?: string; model?: string }).modelName ||
+      (model as { model?: string }).model ||
+      "";
     const customModel = this.chainManager.chatModelManager.findModelByName(modelName);
     return customModel?.capabilities?.includes(capability) ?? false;
   }
@@ -522,7 +525,7 @@ OUTPUT ONLY XML - NO OTHER TEXT.`;
   private async streamMultimodalResponse(
     textContent: string,
     userMessage: ChatMessage,
-    allToolOutputs: any[],
+    allToolOutputs: unknown[],
     abortController: AbortController,
     thinkStreamer: ThinkBlockStreamer,
     originalUserQuestion: string
@@ -537,7 +540,7 @@ OUTPUT ONLY XML - NO OTHER TEXT.`;
     const isMultimodalCurrent = this.isMultimodalModel(chatModel);
 
     // Create messages array
-    const messages: any[] = [];
+    const messages: unknown[] = [];
 
     // Envelope-based context construction (required)
     const envelope = userMessage.contextEnvelope;
@@ -693,7 +696,7 @@ OUTPUT ONLY XML - NO OTHER TEXT.`;
       undefined,
       excludeThinking
     );
-    let sources: { title: string; path: string; score: number; explanation?: any }[] = [];
+    let sources: { title: string; path: string; score: number; explanation?: unknown }[] = [];
 
     const isPlusUser = await checkIsPlusUser({
       isCopilotPlus: true,
@@ -736,7 +739,7 @@ OUTPUT ONLY XML - NO OTHER TEXT.`;
 
         // Execute getTimeRangeMs immediately if present (needed for localSearch timeRange)
         // We execute it once here and remove it from toolCalls to avoid double execution
-        let timeRange: any = undefined;
+        let timeRange: unknown = undefined;
         const timeRangeCall = planningResult.toolCalls.find(
           (tc) => tc.tool.name === "getTimeRangeMs"
         );
@@ -764,7 +767,7 @@ OUTPUT ONLY XML - NO OTHER TEXT.`;
           salientTerms: planningResult.salientTerms,
           timeRange,
         });
-      } catch (error: any) {
+      } catch (error: unknown) {
         return this.handleResponse(
           getApiErrorMessage(error),
           userMessage,
@@ -805,7 +808,7 @@ OUTPUT ONLY XML - NO OTHER TEXT.`;
         thinkStreamer,
         cleanedUserMessage
       );
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Reset loading message to default
       updateLoadingMessage?.(LOADING_MESSAGES.DEFAULT);
 
@@ -839,7 +842,10 @@ OUTPUT ONLY XML - NO OTHER TEXT.`;
     const fallbackSources =
       this.lastCitationSources && this.lastCitationSources.length > 0
         ? this.lastCitationSources
-        : ((sources as any[]) || []).map((source) => ({ title: source.title, path: source.path }));
+        : (
+            (sources as { title: string; path: string; score: number; explanation?: unknown }[]) ||
+            []
+          ).map((source) => ({ title: source.title, path: source.path }));
 
     fullAIResponse = addFallbackSources(
       fullAIResponse,
@@ -862,14 +868,14 @@ OUTPUT ONLY XML - NO OTHER TEXT.`;
   }
 
   private async executeToolCalls(
-    toolCalls: any[],
+    toolCalls: unknown[],
     updateLoadingMessage?: (message: string) => void
   ): Promise<{
-    toolOutputs: { tool: string; output: any }[];
-    sources: { title: string; path: string; score: number; explanation?: any }[];
+    toolOutputs: { tool: string; output: unknown }[];
+    sources: { title: string; path: string; score: number; explanation?: unknown }[];
   }> {
     const toolOutputs = [];
-    const allSources: { title: string; path: string; score: number; explanation?: any }[] = [];
+    const allSources: { title: string; path: string; score: number; explanation?: unknown }[] = [];
 
     // TODO: remove this hack until better solution in place (logan, wenzheng)
     // Skip getFileTree if localSearch is already being called to avoid redundant work
@@ -917,12 +923,12 @@ OUTPUT ONLY XML - NO OTHER TEXT.`;
   // Persist citation lines built for this turn to reuse in fallback
   private lastCitationSources: { title?: string; path?: string }[] | null = null;
 
-  protected getTimeExpression(toolCalls: any[]): string {
+  protected getTimeExpression(toolCalls: unknown[]): string {
     const timeRangeCall = toolCalls.find((call) => call.tool.name === "getTimeRangeMs");
     return timeRangeCall ? timeRangeCall.args.timeExpression : "";
   }
 
-  private prepareLocalSearchResult(documents: any[], timeExpression: string): string {
+  private prepareLocalSearchResult(documents: unknown[], timeExpression: string): string {
     // First filter documents with includeInContext
     const includedDocs = documents.filter((doc) => doc.includeInContext);
 
@@ -963,14 +969,14 @@ OUTPUT ONLY XML - NO OTHER TEXT.`;
     // Build a compact, unnumbered source catalog to avoid bias
     const sourceEntries: SourceCatalogEntry[] = withIds
       .slice(0, Math.min(20, withIds.length))
-      .map((d: any) => ({
+      .map((d: unknown) => ({
         title: d.title || d.path || "Untitled",
         path: d.path || d.title || "",
       }));
     const catalogLines = formatSourceCatalog(sourceEntries);
 
     // Also keep a numbered mapping for fallback use only (if model emits footnotes but forgets Sources)
-    this.lastCitationSources = withIds.slice(0, Math.min(20, withIds.length)).map((d: any) => {
+    this.lastCitationSources = withIds.slice(0, Math.min(20, withIds.length)).map((d: unknown) => {
       const title = d.title || d.path || "Untitled";
       return {
         title,
@@ -1005,9 +1011,9 @@ OUTPUT ONLY XML - NO OTHER TEXT.`;
   ): {
     formattedForLLM: string;
     formattedForDisplay: string;
-    sources: { title: string; path: string; score: number; explanation?: any }[];
+    sources: { title: string; path: string; score: number; explanation?: unknown }[];
   } {
-    let sources: { title: string; path: string; score: number; explanation?: any }[] = [];
+    let sources: { title: string; path: string; score: number; explanation?: unknown }[] = [];
     let formattedForLLM: string;
     let formattedForDisplay: string;
 
@@ -1062,7 +1068,7 @@ OUTPUT ONLY XML - NO OTHER TEXT.`;
    * Formats all tool outputs uniformly for user message.
    * All tools (localSearch, webSearch, getFileTree, etc.) are treated the same.
    */
-  private formatAllToolOutputs(toolOutputs: any[]): string {
+  private formatAllToolOutputs(toolOutputs: unknown[]): string {
     if (toolOutputs.length === 0) return "";
 
     const formattedOutputs = toolOutputs

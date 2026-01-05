@@ -28,7 +28,7 @@ export interface OramaDocument {
   tags: string[];
   extension: string;
   nchars: number;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 export class DBOperations {
@@ -311,9 +311,9 @@ export class DBOperations {
     if (!path) return;
     // Use getAllDocuments + JS filter for reliable path matching (handles Unicode/Chinese correctly)
     const allDocs = await DBOperations.getAllDocuments(db);
-    const filtered = allDocs.filter((doc: any) => doc.path === path);
+    const filtered = allDocs.filter((doc: unknown) => doc.path === path);
     // Return in same format as before (hits with document and score)
-    return filtered.map((doc: any) => ({ document: doc, score: 1 }));
+    return filtered.map((doc: unknown) => ({ document: doc, score: 1 }));
   }
 
   public static async getDocsByEmbedding(
@@ -375,7 +375,7 @@ export class DBOperations {
     };
   }
 
-  async upsert(docToSave: any): Promise<any | undefined> {
+  async upsert(docToSave: unknown): Promise<any | undefined> {
     if (!this.oramaDb) throw new Error("DB not initialized");
     const db = this.oramaDb;
 
@@ -573,14 +573,14 @@ export class DBOperations {
 
     try {
       const files = this.app.vault.getMarkdownFiles();
-      const filePaths = new Set(files.map((file) => file.path));
+      const filePaths = new Set(files.map((file: TFile) => file.path));
 
       // Determine which files are currently eligible for indexing based on settings
       const { inclusions, exclusions } = getMatchingPatterns();
       const allowedPaths = new Set(
         files
-          .filter((file) => shouldIndexFile(file, inclusions, exclusions))
-          .map((file) => file.path)
+          .filter((file: TFile) => shouldIndexFile(file, inclusions, exclusions))
+          .map((file: TFile) => file.path)
       );
       // Get all documents in the database
       const docs = await DBOperations.getAllDocuments(this.oramaDb);

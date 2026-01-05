@@ -2,11 +2,11 @@
 import { App, Modal } from "obsidian";
 
 export class SourcesModal extends Modal {
-  sources: { title: string; path: string; score: number; explanation?: any }[];
+  sources: { title: string; path: string; score: number; explanation?: unknown }[];
 
   constructor(
     app: App,
-    sources: { title: string; path: string; score: number; explanation?: any }[]
+    sources: { title: string; path: string; score: number; explanation?: unknown }[]
   ) {
     super(app);
     this.sources = sources;
@@ -23,7 +23,7 @@ export class SourcesModal extends Modal {
 
   private createSourceList(
     container: HTMLElement,
-    sources: { title: string; path: string; score: number; explanation?: any }[]
+    sources: { title: string; path: string; score: number; explanation?: unknown }[]
   ) {
     const list = container.createEl("ul", { cls: "copilot-sources-list" });
 
@@ -88,7 +88,7 @@ export class SourcesModal extends Modal {
     });
   }
 
-  private addExplanation(container: HTMLElement, explanation: any): HTMLElement {
+  private addExplanation(container: HTMLElement, explanation: unknown): HTMLElement {
     const explanationDiv = container.createDiv({
       cls: "search-explanation copilot-sources-explanation",
     });
@@ -97,8 +97,8 @@ export class SourcesModal extends Modal {
 
     // Add lexical matches
     if (explanation.lexicalMatches && explanation.lexicalMatches.length > 0) {
-      const fields = new Set(explanation.lexicalMatches.map((m: any) => m.field));
-      const queries = new Set(explanation.lexicalMatches.map((m: any) => m.query));
+      const fields = new Set(explanation.lexicalMatches.map((m: unknown) => m.field));
+      const queries = new Set(explanation.lexicalMatches.map((m: unknown) => m.query));
       details.push(
         `Lexical: matched "${Array.from(queries).join('", "')}" in ${Array.from(fields).join(", ")}`
       );

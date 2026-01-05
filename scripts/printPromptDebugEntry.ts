@@ -94,7 +94,7 @@ export async function run(args: string[]): Promise<void> {
   }
 
   const app = createHeadlessApp();
-  (globalThis as any).app = app;
+  (globalThis as { app?: HeadlessApp }).app = app;
 
   initializeBuiltinTools();
 
@@ -108,13 +108,13 @@ export async function run(args: string[]): Promise<void> {
   ).AutonomousAgentChainRunner.generateToolDescriptions(availableTools);
 
   const memoryManager = MemoryManager.getInstance();
-  const userMemoryManager = new UserMemoryManager(app as any);
-  const chainContext = {
+  const userMemoryManager = new UserMemoryManager(app);
+  const chainContext: Record<string, unknown> = {
     memoryManager,
     userMemoryManager,
-  } as any;
+  };
 
-  const adapter = ModelAdapterFactory.createAdapter({ modelName: "gpt-4" } as any);
+  const adapter = ModelAdapterFactory.createAdapter({ modelName: "gpt-4" });
   const report = await buildAgentPromptDebugReport({
     chainManager: chainContext,
     adapter,

@@ -42,7 +42,7 @@ export class CopilotSettingTab extends PluginSettingTab {
       }
 
       // Reload the plugin
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Accessing Obsidian's internal plugins API
       const app = this.plugin.app as any;
       await app.plugins.disablePlugin("open-copilot");
       await app.plugins.enablePlugin("open-copilot");

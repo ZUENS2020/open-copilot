@@ -19,7 +19,7 @@ type ScoreAccumulator = {
  * Full-text search engine using ephemeral FlexSearch index built per-query
  */
 export class FullTextEngine {
-  private index: any; // FlexSearch.Document
+  private index: unknown; // FlexSearch.Document
   private memoryManager: MemoryManager;
   private indexedChunks = new Set<string>();
   private chunkManager: ChunkManager;
@@ -64,7 +64,7 @@ export class FullTextEngine {
    * Create a new FlexSearch index with multilingual tokenization
    * Updated for chunk-based indexing
    */
-  private createIndex(): any {
+  private createIndex(): unknown {
     const Document = (FlexSearch as any).Document;
     const tokenizer = this.tokenizeMixed.bind(this);
     return new Document({
@@ -307,7 +307,7 @@ export class FullTextEngine {
       const linksIn = Object.keys(backlinks);
 
       // Get title from frontmatter or filename
-      const frontmatter = props as Record<string, any>;
+      const frontmatter = props as Record<string, unknown>;
       const title = frontmatter?.title || frontmatter?.name || file.basename;
 
       return {

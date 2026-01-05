@@ -186,6 +186,6 @@ export function $removePillsByURL(url: string): void {
   }
 }
 
-export function $isURLPillNode(node: any): node is URLPillNode {
+export function $isURLPillNode(node: unknown): node is URLPillNode {
   return node instanceof URLPillNode;
 }

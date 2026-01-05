@@ -43,11 +43,6 @@ export default function ProgressCard({ plugin, setHiddenCard, onEditContext }: P
     return item.path;
   };
 
-  // TODO(emt-lin): maybe use it in the future
-  /*const handleRetryAllFailed = () => {
-    console.log("Retrying all failed items");
-  };*/
-
   const handleRetryFailedItem = async (item: FailedItem) => {
     if (!plugin?.projectManager) {
       logError("ProjectManager not available");

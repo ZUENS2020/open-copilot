@@ -4,7 +4,7 @@
 
 export interface ProcessedMessage {
   role: "user" | "assistant";
-  content: any; // string or MessageContent[]
+  content: unknown; // string or MessageContent[]
 }
 
 /**
@@ -14,7 +14,7 @@ export interface ProcessedMessage {
  * @param rawHistory Array of messages from memory.loadMemoryVariables()
  * @returns Array of processed messages safe for LLM consumption
  */
-export function processRawChatHistory(rawHistory: any[]): ProcessedMessage[] {
+export function processRawChatHistory(rawHistory: unknown[]): ProcessedMessage[] {
   const messages: ProcessedMessage[] = [];
 
   for (const message of rawHistory) {
@@ -47,7 +47,7 @@ export function processRawChatHistory(rawHistory: any[]): ProcessedMessage[] {
  * Try to infer the role from various message format properties
  * @returns 'user' | 'assistant' | null
  */
-function inferMessageRole(message: any): "user" | "assistant" | null {
+function inferMessageRole(message: unknown): "user" | "assistant" | null {
   // Check various properties that might indicate the role
   if (message.role === "human" || message.role === "user" || message.sender === "user") {
     return "user";
@@ -67,8 +67,8 @@ function inferMessageRole(message: any): "user" | "assistant" | null {
  * @param messages Target messages array to add to
  */
 export function addChatHistoryToMessages(
-  rawHistory: any[],
-  messages: Array<{ role: string; content: any }>
+  rawHistory: unknown[],
+  messages: Array<{ role: string; content: unknown }>
 ): void {
   const processedHistory = processRawChatHistory(rawHistory);
   for (const msg of processedHistory) {
@@ -99,8 +99,8 @@ export function processedMessagesToTextOnly(
     } else if (Array.isArray(msg.content)) {
       // Extract text from multimodal content
       const textParts = msg.content
-        .filter((item: any) => item.type === "text")
-        .map((item: any) => item.text || "")
+        .filter((item: unknown) => item.type === "text")
+        .map((item: unknown) => item.text || "")
         .join(" ");
       textContent = textParts || "[Image content]";
     } else {

@@ -40,7 +40,7 @@ function clampReadNoteMessage(message: string): string {
   return `${trimmed.slice(0, READ_NOTE_SUMMARY_MAX_LENGTH)}…`;
 }
 
-function summarizeReadNotePayload(payload: any): string | null {
+function summarizeReadNotePayload(payload: Record<string, unknown>): string | null {
   if (!payload || typeof payload !== "object") {
     return null;
   }
@@ -135,7 +135,7 @@ export class ToolResultFormatter {
       }
 
       // Try to parse as JSON for all tools now that they return JSON
-      let parsedResult: any;
+      let parsedResult: unknown;
       try {
         parsedResult = JSON.parse(normalized);
       } catch {
@@ -172,7 +172,7 @@ export class ToolResultFormatter {
    * @param documents Array of parsed local search documents
    * @returns Display-friendly summary string
    */
-  static formatLocalSearchDocuments(documents: any[]): string {
+  static formatLocalSearchDocuments(documents: unknown[]): string {
     if (!Array.isArray(documents) || documents.length === 0) {
       return "📚 Found 0 relevant notes\n\nNo matching notes found.";
     }
@@ -197,7 +197,7 @@ export class ToolResultFormatter {
     return `📚 Found ${total} relevant notes\n\nTop results:\n\n${formattedItems}${footer}`;
   }
 
-  private static formatLocalSearch(result: any): string {
+  private static formatLocalSearch(result: unknown): string {
     // Handle XML-wrapped results from chain runners
     if (typeof result === "string") {
       // Check if it's XML-wrapped content
@@ -215,7 +215,7 @@ export class ToolResultFormatter {
         }
 
         // Robustly extract document information regardless of tag ordering
-        const documents: any[] = [];
+        const documents: Array<{ title: string; path: string; mtime: string | null }> = [];
         const blockRegex = /<document>([\s\S]*?)<\/document>/g;
         let blockMatch;
         while ((blockMatch = blockRegex.exec(xmlContent)) !== null) {
@@ -251,11 +251,12 @@ export class ToolResultFormatter {
     return this.formatLocalSearchDocuments(searchResults);
   }
 
-  private static parseSearchResults(result: any): any[] {
+  private static parseSearchResults(result: unknown): unknown[] {
     // Only support the new structured format or pre-formatted XML flow
     if (typeof result === "object" && result !== null) {
-      if ((result as any).type === "local_search" && Array.isArray((result as any).documents)) {
-        return (result as any).documents;
+      const typedResult = result as Record<string, unknown>;
+      if (typedResult.type === "local_search" && Array.isArray(typedResult.documents)) {
+        return typedResult.documents as unknown[];
       }
       return [];
     }
@@ -274,9 +275,19 @@ export class ToolResultFormatter {
     return [];
   }
 
-  private static formatSearchItem(item: any, index: number): string {
-    const filename = item.path?.split("/").pop()?.replace(/\.md$/, "") || item.title || "Untitled";
-    const score = item.rerank_score || item.score || 0;
+  private static formatSearchItem(item: Record<string, unknown>, index: number): string {
+    const filename =
+      (typeof item.path === "string"
+        ? item.path.split("/").pop()?.replace(/\.md$/, "")
+        : undefined) ||
+      (typeof item.title === "string" ? item.title : undefined) ||
+      "Untitled";
+    const score =
+      typeof item.rerank_score === "number"
+        ? item.rerank_score
+        : typeof item.score === "number"
+          ? item.score
+          : 0;
     const scoreDisplay = typeof score === "number" ? score.toFixed(4) : score;
 
     // For time-filtered results, show as "Recency" instead of "Relevance"
@@ -303,20 +314,28 @@ export class ToolResultFormatter {
       lines.push(`   📊 ${scoreLabel}: ${scoreDisplay}${item.includeInContext ? " ✓" : ""}`);
     }
 
-    const snippet = this.extractContentSnippet(item.content);
+    const snippet = this.extractContentSnippet(
+      typeof item.content === "string" ? item.content : ""
+    );
     if (snippet) {
-      lines.push(`   💬 "${snippet}${item.content?.length > 150 ? "..." : ""}"`);
+      const content = item.content as string | undefined;
+      lines.push(`   💬 "${snippet}${content && content.length > 150 ? "..." : ""}"`);
     }
 
-    if (item.path && !item.path.endsWith(`/${filename}.md`)) {
+    if (typeof item.path === "string" && item.path && !item.path.endsWith(`/${filename}.md`)) {
       lines.push(`   📁 ${item.path}`);
     }
 
     return lines.join("\n");
   }
 
-  private static formatBasicSearchItem(item: any, index: number): string {
-    const title = item.title || item.path || `Result ${index + 1}`;
+  private static formatBasicSearchItem(item: Record<string, unknown>, index: number): string {
+    const title =
+      typeof item.title === "string"
+        ? item.title
+        : typeof item.path === "string"
+          ? item.path
+          : `Result ${index + 1}`;
     const lines = [`${index + 1}. ${title}`];
 
     const modified = item.mtime || item.modified || item.modified_at || item.updated_at;
@@ -324,7 +343,7 @@ export class ToolResultFormatter {
       lines.push(`   🕒 Modified: ${String(modified)}`);
     }
 
-    if (item.path && item.path !== title) {
+    if (typeof item.path === "string" && item.path && item.path !== title) {
       lines.push(`   📁 ${item.path}`);
     }
 
@@ -341,34 +360,37 @@ export class ToolResultFormatter {
     return cleanContent.substring(0, maxLength).replace(/\s+/g, " ").trim();
   }
 
-  private static formatWebSearch(result: any): string {
+  private static formatWebSearch(result: unknown): string {
     // Handle new JSON array format from webSearch tool
-    if (Array.isArray(result) && result.length > 0 && result[0].type === "web_search") {
-      const output: string[] = ["🌐 Web Search Results"];
-      const item = result[0];
+    if (Array.isArray(result) && result.length > 0) {
+      const firstItem = result[0] as Record<string, unknown>;
+      if (firstItem.type === "web_search") {
+        const output: string[] = ["🌐 Web Search Results"];
+        const item = firstItem;
 
-      // Add the main content
-      if (item.content) {
-        output.push("");
-        output.push(item.content);
+        // Add the main content
+        if (typeof item.content === "string" && item.content) {
+          output.push("");
+          output.push(item.content);
+        }
+
+        // Add citations if present
+        if (item.citations && Array.isArray(item.citations) && item.citations.length > 0) {
+          output.push("");
+          output.push("Sources:");
+          (item.citations as string[]).forEach((url: string, index: number) => {
+            output.push(`[${index + 1}] ${url}`);
+          });
+        }
+
+        // Add instruction for the model
+        if (typeof item.instruction === "string" && item.instruction) {
+          output.push("");
+          output.push(`Note: ${item.instruction}`);
+        }
+
+        return output.join("\n");
       }
-
-      // Add citations if present
-      if (item.citations && item.citations.length > 0) {
-        output.push("");
-        output.push("Sources:");
-        item.citations.forEach((url: string, index: number) => {
-          output.push(`[${index + 1}] ${url}`);
-        });
-      }
-
-      // Add instruction for the model
-      if (item.instruction) {
-        output.push("");
-        output.push(`Note: ${item.instruction}`);
-      }
-
-      return output.join("\n");
     }
 
     // Fallback for old string format (for backward compatibility)
@@ -418,42 +440,43 @@ export class ToolResultFormatter {
     return result;
   }
 
-  private static formatYoutubeTranscription(result: any): string {
+  private static formatYoutubeTranscription(result: unknown): string {
     // Handle both string and object results
-    let parsed: any;
+    let parsed: Record<string, unknown> | null = null;
 
     if (typeof result === "string") {
       try {
-        parsed = JSON.parse(result);
+        parsed = JSON.parse(result) as Record<string, unknown>;
       } catch {
         // If not JSON, return as is
         return result;
       }
-    } else if (typeof result === "object") {
-      parsed = result;
+    } else if (typeof result === "object" && result !== null) {
+      parsed = result as Record<string, unknown>;
     } else {
       return String(result);
     }
 
     // Handle error case
-    if (parsed.success === false) {
+    if (parsed && parsed.success === false && typeof parsed.message === "string") {
       return `📺 YouTube Transcription Failed\n\n${parsed.message}`;
     }
 
     // Handle new multi-URL format
-    if (parsed.results && Array.isArray(parsed.results)) {
+    if (parsed && parsed.results && Array.isArray(parsed.results)) {
       const output: string[] = [
-        `📺 YouTube Transcripts (${parsed.total_urls} video${parsed.total_urls > 1 ? "s" : ""})`,
+        `📺 YouTube Transcripts (${typeof parsed.total_urls === "number" ? parsed.total_urls : 0} video${typeof parsed.total_urls === "number" && parsed.total_urls > 1 ? "s" : ""})`,
       ];
       output.push("");
 
       for (const videoResult of parsed.results) {
-        if (videoResult.success) {
-          output.push(`📹 Video: ${videoResult.url}`);
+        const vr = videoResult as Record<string, unknown>;
+        if (vr.success && typeof vr.url === "string" && typeof vr.transcript === "string") {
+          output.push(`📹 Video: ${vr.url}`);
           output.push("");
 
           // Format transcript
-          const lines = videoResult.transcript.split("\n");
+          const lines = vr.transcript.split("\n");
           let formattedLines = 0;
 
           for (const line of lines) {
@@ -477,13 +500,15 @@ export class ToolResultFormatter {
             }
           }
 
-          if (videoResult.elapsed_time_ms) {
+          if (typeof vr.elapsed_time_ms === "number") {
             output.push("");
-            output.push(`Processing time: ${(videoResult.elapsed_time_ms / 1000).toFixed(1)}s`);
+            output.push(`Processing time: ${(vr.elapsed_time_ms / 1000).toFixed(1)}s`);
           }
         } else {
-          output.push(`❌ Failed to transcribe: ${videoResult.url}`);
-          output.push(`   ${videoResult.message}`);
+          output.push(`❌ Failed to transcribe: ${vr.url ?? "unknown URL"}`);
+          if (typeof vr.message === "string") {
+            output.push(`   ${vr.message}`);
+          }
         }
 
         output.push("");
@@ -495,7 +520,7 @@ export class ToolResultFormatter {
     }
 
     // Handle old single-video format
-    if (parsed.transcript) {
+    if (parsed && typeof parsed.transcript === "string") {
       const output: string[] = ["📺 YouTube Transcript"];
       output.push("");
 
@@ -524,7 +549,7 @@ export class ToolResultFormatter {
         }
       }
 
-      if (parsed.elapsed_time_ms) {
+      if (parsed && typeof parsed.elapsed_time_ms === "number") {
         output.push("");
         output.push(`Processing time: ${(parsed.elapsed_time_ms / 1000).toFixed(1)}s`);
       }
@@ -536,9 +561,12 @@ export class ToolResultFormatter {
     return typeof result === "object" ? JSON.stringify(result, null, 2) : String(result);
   }
 
-  private static formatWriteToFile(result: any): string {
+  private static formatWriteToFile(result: unknown): string {
     // Extract result status from object or use string directly
-    const status = typeof result === "object" ? result.result : result;
+    const status =
+      typeof result === "object" && result !== null
+        ? (result as Record<string, unknown>).result
+        : result;
     const statusStr = String(status).toLowerCase();
 
     if (statusStr.includes("accepted")) {
@@ -548,17 +576,22 @@ export class ToolResultFormatter {
     }
 
     // Return message if available, otherwise the raw result
-    return typeof result === "object" && result.message ? result.message : String(status);
+    return typeof result === "object" &&
+      result !== null &&
+      (result as Record<string, unknown>).message
+      ? String((result as Record<string, unknown>).message)
+      : String(status);
   }
 
-  private static formatReplaceInFile(result: any): string {
+  private static formatReplaceInFile(result: unknown): string {
     // Extract block count from object or string
     let blockCount = 0;
     let status = "";
 
-    if (typeof result === "object") {
-      blockCount = result.blocksApplied || 0;
-      status = result.result || "";
+    if (typeof result === "object" && result !== null) {
+      const r = result as Record<string, unknown>;
+      blockCount = typeof r.blocksApplied === "number" ? r.blocksApplied : 0;
+      status = typeof r.result === "string" ? r.result : "";
     } else if (typeof result === "string") {
       const match = result.match(/Applied (\d+) SEARCH\/REPLACE block/);
       if (match) blockCount = parseInt(match[1]);
@@ -577,14 +610,18 @@ export class ToolResultFormatter {
     }
 
     // Return message if available, otherwise the raw result
-    return typeof result === "object" && result.message ? result.message : String(status);
+    return typeof result === "object" &&
+      result !== null &&
+      (result as Record<string, unknown>).message
+      ? String((result as Record<string, unknown>).message)
+      : String(status);
   }
 
-  private static formatReadNote(result: any): string {
-    let payload: any = result;
+  private static formatReadNote(result: unknown): string {
+    let payload: Record<string, unknown> | null = null;
     if (typeof result === "string") {
       try {
-        payload = JSON.parse(result);
+        payload = JSON.parse(result) as Record<string, unknown>;
       } catch {
         payload = null;
       }

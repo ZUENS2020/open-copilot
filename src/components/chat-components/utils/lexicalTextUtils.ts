@@ -254,7 +254,7 @@ function resolveFolderReference(folderName: string): TFolder | null {
     // Get all folders in the vault
     const allFolders = app.vault
       .getAllLoadedFiles()
-      .filter((file): file is TFolder => file instanceof TFolder);
+      .filter((file: TAbstractFile): file is TFolder => file instanceof TFolder);
 
     // First, try exact name match
     for (const folder of allFolders) {
@@ -333,7 +333,7 @@ function resolveNoteReference(noteName: string): TFile | null {
     // Final fallback: search by basename in PDF files
     const allFiles = app.vault.getFiles();
     const pdfFiles = allFiles.filter(
-      (file): file is TFile => file instanceof TFile && file.extension === "pdf"
+      (file: TAbstractFile): file is TFile => file instanceof TFile && file.extension === "pdf"
     );
     for (const file of pdfFiles) {
       if (file.basename === noteName || file.name === noteName) {
@@ -637,7 +637,7 @@ export function $replaceTextRangeWithPills(
 
   if (anchorNode.getType() !== "text") return;
 
-  const textNode = anchorNode as any; // TextNode
+  const textNode = anchorNode as TextNode;
   const textContent = textNode.getTextContent();
 
   // Parse the new text for pills

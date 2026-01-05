@@ -56,20 +56,23 @@ export class CustomCommandManager {
       // Ensure nested folders are created cross-platform
       await ensureFolderExists(folderPath);
 
-      let commandFile = app.vault.getAbstractFileByPath(filePath) as TFile;
+      let commandFile = app.vault.getAbstractFileByPath(filePath);
       if (!commandFile || !(commandFile instanceof TFile)) {
         commandFile = await app.vault.create(filePath, command.content);
       } else {
         await app.vault.modify(commandFile, command.content);
       }
 
-      await app.fileManager.processFrontMatter(commandFile, (frontmatter) => {
-        frontmatter[COPILOT_COMMAND_CONTEXT_MENU_ENABLED] = command.showInContextMenu;
-        frontmatter[COPILOT_COMMAND_SLASH_ENABLED] = command.showInSlashMenu;
-        frontmatter[COPILOT_COMMAND_CONTEXT_MENU_ORDER] = command.order;
-        frontmatter[COPILOT_COMMAND_MODEL_KEY] = command.modelKey;
-        frontmatter[COPILOT_COMMAND_LAST_USED] = command.lastUsedMs;
-      });
+      await app.fileManager.processFrontMatter(
+        commandFile,
+        (frontmatter: Record<string, unknown>) => {
+          frontmatter[COPILOT_COMMAND_CONTEXT_MENU_ENABLED] = command.showInContextMenu;
+          frontmatter[COPILOT_COMMAND_SLASH_ENABLED] = command.showInSlashMenu;
+          frontmatter[COPILOT_COMMAND_CONTEXT_MENU_ORDER] = command.order;
+          frontmatter[COPILOT_COMMAND_MODEL_KEY] = command.modelKey;
+          frontmatter[COPILOT_COMMAND_LAST_USED] = command.lastUsedMs;
+        }
+      );
 
       if (!mergedOptions.skipStoreUpdate) {
         updateCachedCommand(command, command.title);
@@ -80,7 +83,7 @@ export class CustomCommandManager {
   }
 
   async recordUsage(command: CustomCommand) {
-    this.updateCommand({ ...command, lastUsedMs: Date.now() }, command.title);
+    await this.updateCommand({ ...command, lastUsedMs: Date.now() }, command.title);
   }
 
   async updateCommand(command: CustomCommand, prevCommandTitle: string, skipStoreUpdate = false) {
@@ -123,13 +126,16 @@ export class CustomCommandManager {
 
       if (commandFile instanceof TFile) {
         await app.vault.modify(commandFile, command.content);
-        await app.fileManager.processFrontMatter(commandFile, (frontmatter) => {
-          frontmatter[COPILOT_COMMAND_CONTEXT_MENU_ENABLED] = command.showInContextMenu;
-          frontmatter[COPILOT_COMMAND_SLASH_ENABLED] = command.showInSlashMenu;
-          frontmatter[COPILOT_COMMAND_CONTEXT_MENU_ORDER] = command.order;
-          frontmatter[COPILOT_COMMAND_MODEL_KEY] = command.modelKey;
-          frontmatter[COPILOT_COMMAND_LAST_USED] = command.lastUsedMs;
-        });
+        await app.fileManager.processFrontMatter(
+          commandFile,
+          (frontmatter: Record<string, unknown>) => {
+            frontmatter[COPILOT_COMMAND_CONTEXT_MENU_ENABLED] = command.showInContextMenu;
+            frontmatter[COPILOT_COMMAND_SLASH_ENABLED] = command.showInSlashMenu;
+            frontmatter[COPILOT_COMMAND_CONTEXT_MENU_ORDER] = command.order;
+            frontmatter[COPILOT_COMMAND_MODEL_KEY] = command.modelKey;
+            frontmatter[COPILOT_COMMAND_LAST_USED] = command.lastUsedMs;
+          }
+        );
       }
     } finally {
       removePendingFileWrite(filePath);

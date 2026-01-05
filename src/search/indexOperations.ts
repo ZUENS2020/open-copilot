@@ -186,12 +186,12 @@ export class IndexOperations {
       this.finalizeIndexing(errors);
 
       // Run save and integrity check with setTimeout to ensure it's non-blocking
-      setTimeout(() => {
-        this.dbOps
+      void setTimeout(() => {
+        void this.dbOps
           .saveDB()
           .then(() => {
             logInfo("Copilot index final save completed.");
-            this.dbOps.checkIndexIntegrity().catch((err) => {
+            void this.dbOps.checkIndexIntegrity().catch((err) => {
               logError("Background integrity check failed:", err);
             });
           })
@@ -210,7 +210,7 @@ export class IndexOperations {
   private async prepareAllChunks(files: TFile[]): Promise<
     Array<{
       content: string;
-      fileInfo: any;
+      fileInfo: unknown;
     }>
   > {
     const embeddingInstance = await this.embeddingsManager.getEmbeddingsAPI();
@@ -223,7 +223,7 @@ export class IndexOperations {
     const textSplitter = RecursiveCharacterTextSplitter.fromLanguage("markdown", {
       chunkSize: CHUNK_SIZE,
     });
-    const allChunks: Array<{ content: string; fileInfo: any }> = [];
+    const allChunks: Array<{ content: string; fileInfo: unknown }> = [];
 
     for (const file of files) {
       const content = await this.app.vault.cachedRead(file);
@@ -434,7 +434,7 @@ export class IndexOperations {
     }
   }
 
-  private isStringLengthError(error: any): boolean {
+  private isStringLengthError(error: unknown): boolean {
     if (!error) return false;
 
     // Check if it's a direct RangeError
@@ -449,11 +449,11 @@ export class IndexOperations {
   }
 
   private handleError(
-    error: any,
+    error: unknown,
     context?: {
       filePath?: string;
       errors?: string[];
-      batch?: Array<{ content: string; fileInfo: any }>;
+      batch?: Array<{ content: string; fileInfo: unknown }>;
     }
   ): void {
     const filePath = context?.filePath;
@@ -508,7 +508,7 @@ export class IndexOperations {
     new Notice(message);
   }
 
-  private isRateLimitError(err: any): boolean {
+  private isRateLimitError(err: unknown): boolean {
     return err?.message?.includes?.("rate limit") || false;
   }
 

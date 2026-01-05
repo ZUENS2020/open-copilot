@@ -28,7 +28,9 @@ export function useIsPlusUser(): boolean | undefined {
 }
 
 /** Check if the user is a Plus user. Always returns false since Plus is removed. */
-export async function checkIsPlusUser(context?: Record<string, any>): Promise<boolean | undefined> {
+export async function checkIsPlusUser(
+  context?: Record<string, unknown>
+): Promise<boolean | undefined> {
   return false;
 }
 

@@ -4,11 +4,14 @@ export function arrayBufferToBase64(buffer: ArrayBuffer): string {
   for (let i = 0; i < bytes.byteLength; i++) {
     binary += String.fromCharCode(bytes[i]);
   }
-  return (globalThis as any)["btoa"](binary);
+  return (globalThis as { btoa?: (data: string) => string })["btoa"](binary);
 }
 
 export function base64ToArrayBuffer(base64: string): ArrayBuffer {
-  const binaryString = (globalThis as any)["atob"](base64);
+  const binaryString = (globalThis as { atob?: (data: string) => string })["atob"](base64);
+  if (!binaryString) {
+    throw new Error("base64ToArrayBuffer: atob not available");
+  }
   const bytes = new Uint8Array(binaryString.length);
   for (let i = 0; i < binaryString.length; i++) {
     bytes[i] = binaryString.charCodeAt(i);

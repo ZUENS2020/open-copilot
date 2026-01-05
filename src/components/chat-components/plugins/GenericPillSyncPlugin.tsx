@@ -7,9 +7,9 @@ import { $getRoot } from "lexical";
  */
 export interface PillSyncConfig<T> {
   /** Function to check if a node is of this pill type */
-  isPillNode: (node: any) => boolean;
+  isPillNode: (node: unknown) => boolean;
   /** Function to extract data from the pill node */
-  extractData: (node: any) => T;
+  extractData: (node: unknown) => T;
   /** Function to create a unique key for comparison (optional, defaults to value as-is) */
   getKey?: (item: T) => string;
 }
@@ -56,7 +56,7 @@ export function GenericPillSyncPlugin<T>({
         /**
          * Recursively traverse the editor tree to find pill nodes
          */
-        function traverse(node: any): void {
+        function traverse(node: unknown): void {
           if (isPillNode(node)) {
             const data = extractData(node);
             items.push(data);

@@ -189,7 +189,7 @@ export function $removePillsByPath(notePath: string): number {
   const root = $getRoot();
   let removedCount = 0;
 
-  function traverse(node: any): void {
+  function traverse(node: unknown): void {
     if ($isNotePillNode(node) && node.getNotePath() === notePath) {
       node.remove();
       removedCount++;

@@ -1,4 +1,4 @@
-import { App, FuzzyMatch, TFile } from "obsidian";
+import { App, FuzzyMatch, TAbstractFile, TFile } from "obsidian";
 import { BaseNoteModal } from "./BaseNoteModal";
 
 interface ProjectFileSelectModalProps {
@@ -33,9 +33,9 @@ export class ProjectFileSelectModal extends BaseNoteModal<TFile> {
     // Get recently opened files first
     const recentFiles = this.app.workspace
       .getLastOpenFiles()
-      .map((filePath) => this.app.vault.getAbstractFileByPath(filePath))
+      .map((filePath: string) => this.app.vault.getAbstractFileByPath(filePath))
       .filter(
-        (file): file is TFile =>
+        (file: TAbstractFile | null): file is TFile =>
           file instanceof TFile &&
           !excludeFilePaths.includes(file.path) &&
           file.path !== this.activeNote?.path &&
@@ -45,11 +45,11 @@ export class ProjectFileSelectModal extends BaseNoteModal<TFile> {
     // Get all other files that weren't recently opened
     const allFiles = this.app.vault
       .getFiles()
-      .filter((file) => !excludedExtensions.includes(file.extension.toLowerCase()));
+      .filter((file: TFile) => !excludedExtensions.includes(file.extension.toLowerCase()));
 
     const otherFiles = allFiles.filter(
-      (file) =>
-        !recentFiles.some((recent) => recent.path === file.path) &&
+      (file: TFile) =>
+        !recentFiles.some((recent: TFile) => recent.path === file.path) &&
         !excludeFilePaths.includes(file.path) &&
         file.path !== this.activeNote?.path
     );

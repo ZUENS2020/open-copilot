@@ -3,6 +3,7 @@ import React from "react";
 import { SelectedTextContext } from "@/types/message";
 import { TFile } from "obsidian";
 import { ChatContextMenu } from "./ChatContextMenu";
+import type { LexicalEditor } from "lexical";
 
 interface ChatControlsProps {
   contextNotes: TFile[];
@@ -12,11 +13,11 @@ interface ChatControlsProps {
   contextFolders: string[];
   selectedTextContexts?: SelectedTextContext[];
   showProgressCard: () => void;
-  lexicalEditorRef?: React.RefObject<any>;
+  lexicalEditorRef?: React.RefObject<LexicalEditor>;
 
   // Unified handlers
-  onAddToContext: (category: string, data: any) => void;
-  onRemoveFromContext: (category: string, data: any) => void;
+  onAddToContext: (category: string, data: unknown) => void;
+  onRemoveFromContext: (category: string, data: unknown) => void;
 }
 
 export const ContextControl: React.FC<ChatControlsProps> = ({
@@ -31,12 +32,12 @@ export const ContextControl: React.FC<ChatControlsProps> = ({
   onAddToContext,
   onRemoveFromContext,
 }) => {
-  const handleRemoveContext = (category: string, data: any) => {
+  const handleRemoveContext = (category: string, data: unknown) => {
     // Delegate to unified handler
     onRemoveFromContext(category, data);
   };
 
-  const handleTypeaheadSelect = (category: string, data: any) => {
+  const handleTypeaheadSelect = (category: string, data: unknown) => {
     // Delegate to unified handler
     onAddToContext(category, data);
   };

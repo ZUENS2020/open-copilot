@@ -8,7 +8,7 @@ interface FocusPluginProps {
   /** Callback that receives a function to programmatically focus the editor */
   onFocus: (focusFn: () => void) => void;
   /** Optional callback that receives the editor instance when ready */
-  onEditorReady?: (editor: any) => void;
+  onEditorReady?: (editor: unknown) => void;
 }
 
 /**

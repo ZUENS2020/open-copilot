@@ -57,7 +57,7 @@ export function createTool<TSchema extends z.ZodType, TOutput = any>(
     name: options.name,
     description: options.description,
     schema: options.schema,
-    call: async (args: any) => {
+    call: async (args: Record<string, unknown>) => {
       try {
         // Handle empty objects for void schemas
         if (
@@ -81,7 +81,7 @@ export function createTool<TSchema extends z.ZodType, TOutput = any>(
         }
 
         // Validate at runtime with better error handling
-        const validated = options.schema.parse(args) as any;
+        const validated = options.schema.parse(args) as z.infer<TSchema>;
 
         // Merge validated args with injected params for handler
         const handlerArgs = { ...(validated || {}), ...injectedParams };
@@ -90,8 +90,8 @@ export function createTool<TSchema extends z.ZodType, TOutput = any>(
       } catch (error) {
         if (error instanceof z.ZodError) {
           // Format Zod errors for better readability
-          const formattedErrors = (error as any).issues
-            .map((e: any) => `${e.path.join(".")}: ${e.message}`)
+          const formattedErrors = error.issues
+            .map((e) => `${e.path.join(".")}: ${e.message}`)
             .join(", ");
           throw new Error(`Tool ${options.name} validation failed: ${formattedErrors}`);
         }
@@ -139,11 +139,14 @@ function getZodDescription(schema: z.ZodType): string {
     schema instanceof z.ZodNullable ||
     schema instanceof z.ZodDefault
   ) {
-    return getZodDescription((schema as any)._def.innerType);
+    return getZodDescription(
+      (schema as z.ZodOptional<unknown> | z.ZodNullable<unknown> | z.ZodDefault<unknown>)._def
+        .innerType
+    );
   }
 
   // @ts-ignore - accessing private _def property
-  return (schema as any)._def.description || "";
+  return (schema as z.ZodTypeAny)._def.description || "";
 }
 
 /**
@@ -159,10 +162,10 @@ export function createAsyncTool<TSchema extends z.ZodType, TOutput = any>(
 
   if (options.asyncValidator) {
     const originalCall = tool.call;
-    tool.call = async (args: any) => {
+    tool.call = async (args: Record<string, unknown>) => {
       const validated = options.schema.parse(args);
       await options.asyncValidator!(validated);
-      return originalCall(args);
+      return originalCall(validated);
     };
   }
 

@@ -23,7 +23,7 @@ async function saveUnsupportedCommands(commands: CustomCommand[]) {
     commands.map(async (command) => {
       const filePath = `${unsupportedFolderPath}/${command.title}.md`;
       const file = await app.vault.create(filePath, command.content);
-      await app.fileManager.processFrontMatter(file, (frontmatter) => {
+      await app.fileManager.processFrontMatter(file, (frontmatter: Record<string, unknown>) => {
         frontmatter[COPILOT_COMMAND_CONTEXT_MENU_ENABLED] = command.showInContextMenu;
         frontmatter[COPILOT_COMMAND_SLASH_ENABLED] = command.showInSlashMenu;
         frontmatter[COPILOT_COMMAND_CONTEXT_MENU_ORDER] = command.order;
@@ -98,7 +98,7 @@ export async function migrateCommands() {
 }
 
 /** Generates the default commands. */
-export async function generateDefaultCommands(): Promise<void> {
+export function generateDefaultCommands(): void {
   const existingCommands = getCachedCustomCommands();
   const defaultCommands = DEFAULT_COMMANDS.filter(
     (command) => !existingCommands.some((c) => c.title === command.title)
@@ -108,7 +108,7 @@ export async function generateDefaultCommands(): Promise<void> {
 }
 
 /** Suggests the default commands if the user has not created any commands yet. */
-export async function suggestDefaultCommands(): Promise<void> {
+export function suggestDefaultCommands(): void {
   const suggestedCommand = getSettings().suggestedDefaultCommands;
   if (suggestedCommand) {
     // We only show the modal once

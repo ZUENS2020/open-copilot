@@ -4,7 +4,7 @@ import { RESTRICTION_MESSAGES } from "@/constants";
 import { logWarn, logInfo, logError } from "@/logger";
 import { FileParserManager } from "@/tools/FileParserManager";
 import { isPlusChain } from "@/utils";
-import { TFile, Vault, Notice } from "obsidian";
+import { TFile, Vault, Notice, HeadingCache } from "obsidian";
 import {
   NOTE_CONTEXT_PROMPT_TAG,
   EMBEDDED_PDF_TAG,
@@ -366,7 +366,8 @@ export class ContextProcessor {
       const headings = cache?.headings ?? [];
       const normalizedTarget = this.normalizeHeadingForMatch(focus.heading);
       const targetIndex = headings.findIndex(
-        (headingCache) => this.normalizeHeadingForMatch(headingCache.heading) === normalizedTarget
+        (headingCache: HeadingCache) =>
+          this.normalizeHeadingForMatch(headingCache.heading) === normalizedTarget
       );
 
       if (targetIndex === -1) {

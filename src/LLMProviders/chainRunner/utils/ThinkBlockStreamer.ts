@@ -22,7 +22,7 @@ export class ThinkBlockStreamer {
     private excludeThinking: boolean = false
   ) {}
 
-  private handleClaudeChunk(content: any[]) {
+  private handleClaudeChunk(content: unknown[]) {
     let textContent = "";
     let hasThinkingContent = false;
     for (const item of content) {
@@ -59,7 +59,7 @@ export class ThinkBlockStreamer {
     return hasThinkingContent;
   }
 
-  private handleDeepseekChunk(chunk: any) {
+  private handleDeepseekChunk(chunk: unknown) {
     // Handle standard string content
     if (typeof chunk.content === "string") {
       this.fullResponse += chunk.content;
@@ -102,7 +102,7 @@ export class ThinkBlockStreamer {
    * - Models that only populate reasoning_details (without delta.reasoning) won't show thinking
    * - This is acceptable for now as most models use delta.reasoning for streaming
    */
-  private handleOpenRouterChunk(chunk: any) {
+  private handleOpenRouterChunk(chunk: unknown) {
     // Only process delta.reasoning (streaming), ignore reasoning_details entirely
     if (chunk.additional_kwargs?.delta?.reasoning) {
       // Skip thinking content if excludeThinking is enabled
@@ -131,7 +131,7 @@ export class ThinkBlockStreamer {
     return false; // No thinking handled
   }
 
-  processChunk(chunk: any) {
+  processChunk(chunk: unknown) {
     // If we've already decided to truncate, don't process more chunks
     if (this.shouldTruncate) {
       return;

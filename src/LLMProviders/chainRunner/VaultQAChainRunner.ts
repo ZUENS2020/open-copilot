@@ -129,7 +129,7 @@ export class VaultQAChainRunner extends BaseChainRunner {
       // Sanitize content to remove pre-existing citation markers
 
       const context = retrievedDocs
-        .map((doc: any) => {
+        .map((doc: unknown) => {
           const title = doc.metadata?.title || "Untitled";
           const path = doc.metadata?.path || title;
           return `<${RETRIEVED_DOCUMENT_TAG}>\n<title>${title}</title>\n<path>${path}</path>\n<content>\n${sanitizeContentForCitations(doc.pageContent)}\n</content>\n</${RETRIEVED_DOCUMENT_TAG}>`;
@@ -137,13 +137,13 @@ export class VaultQAChainRunner extends BaseChainRunner {
         .join("\n\n");
 
       // Step 6: Build messages array with envelope-aware logic
-      const messages: any[] = [];
+      const messages: unknown[] = [];
       const chatModel = this.chainManager.chatModelManager.getChatModel();
 
       // Prepare RAG context and citation instructions
       const sourceEntries: SourceCatalogEntry[] = retrievedDocs
         .slice(0, Math.max(5, Math.min(20, retrievedDocs.length)))
-        .map((d: any) => ({
+        .map((d: unknown) => ({
           title: d.metadata?.title || d.metadata?.path || "Untitled",
           path: d.metadata?.path || d.metadata?.title || "",
         }));
@@ -191,7 +191,7 @@ export class VaultQAChainRunner extends BaseChainRunner {
 
         // Handle multimodal content if present
         if (userMessage.content && Array.isArray(userMessage.content)) {
-          const updatedContent = userMessage.content.map((item: any) => {
+          const updatedContent = userMessage.content.map((item: unknown) => {
             if (item.type === "text") {
               return { ...item, text: enhancedUserContent };
             }
@@ -233,7 +233,7 @@ export class VaultQAChainRunner extends BaseChainRunner {
         }
         streamer.processChunk(chunk);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Check if the error is due to abort signal
       if (error.name === "AbortError" || abortController.signal.aborted) {
         logInfo("VaultQA stream aborted by user", { reason: abortController.signal.reason });

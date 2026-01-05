@@ -137,7 +137,7 @@ export async function parseCustomCommandFile(file: TFile): Promise<CustomCommand
 }
 
 export async function loadAllCustomCommands(): Promise<CustomCommand[]> {
-  const files = app.vault.getFiles().filter((file) => isCustomCommandFile(file));
+  const files = app.vault.getFiles().filter((file: TAbstractFile) => isCustomCommandFile(file));
   const commands: CustomCommand[] = await Promise.all(files.map(parseCustomCommandFile));
   updateCachedCommands(commands);
   return commands;
@@ -481,7 +481,7 @@ export function getNextCustomCommandOrder(): number {
 export async function ensureCommandFrontmatter(file: TFile, command: CustomCommand) {
   try {
     addPendingFileWrite(file.path);
-    await app.fileManager.processFrontMatter(file, (frontmatter) => {
+    await app.fileManager.processFrontMatter(file, (frontmatter: Record<string, unknown>) => {
       if (frontmatter[COPILOT_COMMAND_CONTEXT_MENU_ENABLED] == null) {
         frontmatter[COPILOT_COMMAND_CONTEXT_MENU_ENABLED] = command.showInContextMenu;
       }
